@@ -28,3 +28,17 @@ exports.loginUser = async ({ email, password }) => {
 
   return user;
 };
+
+exports.activateUser = async (userId) => {
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { isActive: true },
+    { new: true }
+  );
+
+  if (!updatedUser) throw { status: 404, message: "User not found" };
+
+  return updatedUser;
+};
+
+

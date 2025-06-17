@@ -17,7 +17,7 @@ const RegisterUserDTO = Joi.object({
   }),
 
   gender: Joi.string().valid("male", "female", "other").default("other"),
-  bio: Joi.string().max(300).optional(),
+ 
 });
 
 const LoginUserDTO = Joi.object({
