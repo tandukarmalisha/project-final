@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -11,25 +13,43 @@ const Login = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setError("");
 
-    try {
-      const res = await axios.post("http://localhost:8000/api/auth/login", form);
-      const { token, user } = res.data;
+//     try {
+//       const res = await axios.post("http://localhost:8000/api/auth/login", form);
+//       const { token, user } = res.data;
 
-      // Optional: Save token to localStorage
-      localStorage.setItem("token", token);
+//       // Optional: Save token to localStorage
+//       localStorage.setItem("token", token);
 
-      alert("Login successful!");
-      // Navigate to home/dashboard (create later)
-      navigate("/dashboard");
-    } catch (err) {
-      const msg = err.response?.data?.message || "Login failed. Try again.";
-      setError(msg);
-    }
-  };
+//       alert("Login successful!");
+//       // Navigate to home/dashboard (create later)
+//       navigate("/dashboard");
+//     } catch (err) {
+//       const msg = err.response?.data?.message || "Login failed. Try again.";
+//       setError(msg);
+//     }
+//   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+
+  try {
+    const res = await axios.post("http://localhost:8000/api/auth/login", form);
+    const { token, user } = res.data;
+
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));  // Save user info too!
+
+    toast.success("✅ loginsuccessfully!");
+    navigate("/dashboard");
+  } catch (err) {
+    const msg = err.response?.data?.message || "Login failed. Try again.";
+    setError(msg);
+  }
+};
 
   return (
     <div className="form-container">
