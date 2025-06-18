@@ -20,6 +20,6 @@ const router = express.Router();
 
 router.post("/register", validator(RegisterUserDTO), register);
 router.post("/login", validator(LoginUserDTO), login);
-router.post("/activate", activateAccount); // Add this line if you have an activateAccount function
+router.get("/activate/:token", activateAccount); // Add this line if you have an activateAccount function
 
 module.exports = router;

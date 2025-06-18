@@ -8,7 +8,7 @@ const connectToMongoDB = require("./src/config/mongodb.config");
 const app = require("./src/config/express.config");
 
 // Define port
-const PORT = process.env.PORT || 8001;
+const PORT = process.env.PORT || 8000;
 
 // Connect to MongoDB first, then start the server
 (async () => {
