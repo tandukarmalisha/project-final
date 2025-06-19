@@ -10,6 +10,8 @@ import Dashboard from "./pages/Dashboard";
 import AddBlog from "./pages/AddBlog";
 import ProfilePage from "./pages/ProfilePage";
 import BlogDetail from "./pages/BlogDetail";
+import UpdateBlogPage from "./pages/UpdateBlogPage";
+import "react-toastify/dist/ReactToastify.css"; // Import toastify styles
 import { ToastContainer } from "react-toastify";
 
 function App() {
@@ -28,6 +30,7 @@ function App() {
         <Route path = "/add-blog" element={<AddBlog />} />
         <Route path = "/profile" element = {<ProfilePage/>}/>
         <Route path="/blog/:id" element={<BlogDetail />} />
+        <Route path="/update-blog/:id" element={<UpdateBlogPage />} />
         <Route path="*" element={<div>Page Not Found</div>} />
 
       </Routes>

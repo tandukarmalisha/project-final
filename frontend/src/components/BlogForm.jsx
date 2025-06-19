@@ -221,6 +221,7 @@ const BlogForm = () => {
             <option value="Bollywood">Bollywood</option>
             <option value="Sports">Sports</option>
             <option value="Programming">Programming</option>
+            <option value="Entertainment">Entertainment</option>
           </select>
 
           <textarea
@@ -245,7 +246,7 @@ const BlogForm = () => {
             style={styles.button}
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1e40af")}
             onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
-            
+            color="#fff"
           >
             Publish Blog
           </button>
