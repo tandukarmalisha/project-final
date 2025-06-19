@@ -52,7 +52,8 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    const token = jwtService.signToken({ id: user._id });
+    const token = jwtService.signToken({ id: user._id }, process.env.JWT_SECRET, {
+  expiresIn: "7d",});
 
     res.status(200).json({
       success: true,
