@@ -17,6 +17,9 @@ app.get('/',(req, res, next) => {
 //Mount API Routes
 app.use(router);
 
+
+
+
 // Central Error Handling Middleware (must be AFTER routes)
 app.use((err, req, res, next) => {
   console.error("Error caught by middleware:", err);

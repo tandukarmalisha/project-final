@@ -22,28 +22,55 @@ exports.createBlog = async (req, res) => {
 };
 
 // Get All Blogs
+// exports.getAllBlogs = async (req, res) => {
+//   try {
+//     const blogs = await Blog.find()
+//       .populate('author', 'username email')
+//       .sort({ createdAt: -1 });
+
+//     res.json(blogs);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// // Get Single Blog by ID
+// exports.getBlogById = async (req, res) => {
+//   try {
+//     const blog = await Blog.findById(req.params.id).populate('author', 'username');
+//     if (!blog) return res.status(404).json({ message: "Blog not found" });
+//     res.json(blog);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// Get all blogs
 exports.getAllBlogs = async (req, res) => {
   try {
     const blogs = await Blog.find()
-      .populate('author', 'username email')
+      .populate("author", "name") // populate only the 'name' field
       .sort({ createdAt: -1 });
-
     res.json(blogs);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Get Single Blog by ID
+// Get blog by ID
 exports.getBlogById = async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id).populate('author', 'username');
+    const blog = await Blog.findById(req.params.id)
+      .populate("author", "name"); // make sure author is populated here too
+
     if (!blog) return res.status(404).json({ message: "Blog not found" });
+
     res.json(blog);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 // Update Blog
 exports.updateBlog = async (req, res) => {
@@ -191,9 +218,22 @@ exports.addComment = async (req, res) => {
 
 exports.getBlogsByUser = async (req, res) => {
   try {
-    const blogs = await Blog.find({ author: req.params.userId }).sort({ createdAt: -1 });
-    res.status(200).json({ blogs });
+    const userId = req.params.userId;
+    const blogs = await Blog.find({ author: userId }).sort({ createdAt: -1 });
+    res.json({ blogs }); // ✅ wrap blogs in an object
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch blogs" });
+    res.status(500).json({ message: error.message });
   }
 };
+
+
+exports.getBlogById = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+    res.json(blog); // blog should include image URL property if saved
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
