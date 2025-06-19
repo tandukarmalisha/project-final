@@ -1,10 +1,7 @@
-
-
-
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // Import navigate
+import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as regularHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as solidHeart } from "@fortawesome/free-solid-svg-icons";
@@ -14,8 +11,9 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
   const [comments, setComments] = useState(blog.comments || []);
   const [newComment, setNewComment] = useState("");
   const [showCommentInput, setShowCommentInput] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
   const likedByUser =
     Array.isArray(likes) && currentUserId
@@ -27,7 +25,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
       const token = localStorage.getItem("token");
       if (!token) {
         toast.info("Please register or login to interact with blogs.");
-        // No token means user is not logged in
         navigate("/register");
         return;
       }
@@ -35,20 +32,15 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
       const res = await axios.patch(
         `http://localhost:8000/api/blog/${blog._id}/like`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (res.data && Array.isArray(res.data.likes)) {
         setLikes(res.data.likes);
         onLikeToggle && onLikeToggle(blog._id, res.data.likes);
-      } else {
-        console.warn("Unexpected response format:", res.data);
       }
     } catch (error) {
       if (error.response?.status === 401) {
-        // Unauthorized, redirect to register/login page
         toast.info("Session expired. Please login again.");
         navigate("/register");
       } else {
@@ -56,104 +48,135 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
       }
     }
   };
-//     e.preventDefault();
-//     if (!newComment.trim()) return;
 
-//     try {
-//       const token = localStorage.getItem("token");
-//       if (!token) {
-//         navigate("/register");
-//         return;
-//       }
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
 
-//       const res = await axios.patch(
-//         `http://localhost:8000/api/blog/${blog._id}/comment`,
-//         { comment: newComment },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       );
-
-//       if (res.data && res.data.comment) {
-//         setComments((prev) => [...prev, res.data.comment]);
-//         setNewComment("");
-//       }
-//     } catch (err) {
-//       if (err.response?.status === 401) {
-//         navigate("/register");
-//       } else {
-//         console.error("Comment error:", err.response?.data || err.message);
-//       }
-//     }
-//   };
-const handleCommentSubmit = async (e) => {
-  e.preventDefault();
-  if (!newComment.trim()) return;
-
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/register");
-      return;
-    }
-
-    const res = await axios.patch(
-      `http://localhost:8000/api/blog/${blog._id}/comment`,
-      { comment: newComment },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/register");
+        return;
       }
-    );
 
-    if (res.data && res.data.comment) {
-      setComments((prev) => [...prev, res.data.comment]);
-      setNewComment("");
+      const res = await axios.patch(
+        `http://localhost:8000/api/blog/${blog._id}/comment`,
+        { comment: newComment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data && res.data.comment) {
+        setComments((prev) => [...prev, res.data.comment]);
+        setNewComment("");
+        setShowComments(true);
+      }
+    } catch (err) {
+      if (err.response?.status === 401) {
+        navigate("/register");
+      } else {
+        console.error("Comment error:", err.response?.data || err.message);
+      }
     }
-  } catch (err) {
-    if (err.response?.status === 401) {
-      navigate("/register");
-    } else {
-      console.error("Comment error:", err.response?.data || err.message);
-    }
-  }
-};
+  };
+
+  const truncatedContent =
+    blog.content.length > 250
+      ? `${blog.content.substring(0, 250)}... `
+      : blog.content;
 
   return (
     <div
       style={{
         border: "1px solid #ccc",
         borderRadius: 8,
-        padding: 16,
+        padding: 20,
         marginBottom: 20,
+        backgroundColor: "#fff",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        cursor: "pointer",
+        transition: "box-shadow 0.2s ease-in-out",
       }}
+      onClick={() => navigate(`/blog/${blog._id}`)}
+      onMouseEnter={(e) =>
+        (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)")
+      }
+      onMouseLeave={(e) =>
+        (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)")
+      }
     >
+      {/* Author */}
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+        <div
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            backgroundColor: "#4f46e5",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            fontSize: 18,
+            marginRight: 10,
+          }}
+        >
+          {blog.author?.name?.charAt(0) || "U"}
+        </div>
+        <strong>{blog.author?.name || "Unknown User"}</strong>
+      </div>
+
+      {/* Blog Content */}
       <h2>{blog.title}</h2>
 
       {blog.image && (
         <img
           src={blog.image}
           alt="Blog"
-          style={{ width: "100%", maxHeight: 300, objectFit: "cover" }}
+          style={{
+            width: "100%",
+            maxHeight: 300,
+            objectFit: "cover",
+            borderRadius: 6,
+            marginBottom: 10,
+          }}
         />
       )}
 
-      <p>{blog.content}</p>
+      <p style={{ marginTop: "1rem" }}>
+        {truncatedContent}
+        {blog.content.length > 250 && (
+          <span
+            style={{
+              color: "#4f46e5",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              e.stopPropagation(); // prevent navigating twice
+              navigate(`/blog/${blog._id}`);
+            }}
+          >
+            Read more
+          </span>
+        )}
+      </p>
+
       <p>
         <strong>Category:</strong> {blog.categories?.join(", ")}
       </p>
 
-      {/* Like and Comment Buttons */}
+      {/* Like & Comment Buttons */}
       <div
         style={{
           display: "flex",
           gap: 16,
-          marginTop: 12,
+          marginTop: 16,
           alignItems: "center",
         }}
+        onClick={(e) => e.stopPropagation()} // prevent card click
       >
         <button
           onClick={handleLike}
@@ -176,6 +199,22 @@ const handleCommentSubmit = async (e) => {
         </button>
 
         <button
+          onClick={() => setShowComments((prev) => !prev)}
+          style={{
+            cursor: "pointer",
+            background: "none",
+            border: "none",
+            fontSize: 16,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            color: "#444",
+          }}
+        >
+          💬 Comments ({comments.length})
+        </button>
+
+        <button
           onClick={() => setShowCommentInput((prev) => !prev)}
           style={{
             cursor: "pointer",
@@ -188,7 +227,7 @@ const handleCommentSubmit = async (e) => {
             color: "#444",
           }}
         >
-          💬 Comment ({comments.length})
+          ✍️ Add Comment
         </button>
       </div>
 
@@ -197,11 +236,16 @@ const handleCommentSubmit = async (e) => {
         <form
           onSubmit={handleCommentSubmit}
           style={{
-            marginTop: 12,
+            marginTop: 16,
             display: "flex",
-            gap: "8px",
-            alignItems: "center",
+            flexDirection: "column",
+            gap: 10,
+            backgroundColor: "#f9f9f9",
+            padding: "1rem",
+            borderRadius: 8,
+            border: "1px solid #ddd",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
           <input
             type="text"
@@ -209,9 +253,8 @@ const handleCommentSubmit = async (e) => {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             style={{
-              flexGrow: 1,
-              padding: "8px 12px",
-              borderRadius: "20px",
+              padding: "10px 14px",
+              borderRadius: 8,
               border: "1px solid #ccc",
               outline: "none",
               fontSize: 14,
@@ -220,68 +263,69 @@ const handleCommentSubmit = async (e) => {
           <button
             type="submit"
             style={{
-              padding: "8px 12px",
-              borderRadius: "20px",
-              cursor: "pointer",
-              border: "none",
-              backgroundColor: "#007bff",
-              color: "white",
+              padding: "10px 14px",
+              borderRadius: 6,
+              backgroundColor: "#4f46e5",
+              color: "#fff",
               fontWeight: "bold",
-              fontSize: 14,
-              whiteSpace: "nowrap",
+              border: "none",
+              width: "fit-content",
+              alignSelf: "flex-end",
+              cursor: "pointer",
             }}
           >
-            Post
+            Post Comment
           </button>
         </form>
       )}
 
       {/* Comments List */}
-      <div style={{ marginTop: 16 }}>
-        {comments.length === 0 ? (
-          <p style={{ fontStyle: "italic", color: "#666" }}>No comments yet.</p>
-        ) : (
-          comments.map((c, i) => (
-            <div
-              key={i}
-              style={{
-                borderBottom: "1px solid #eee",
-                padding: "8px 0",
-                fontSize: 14,
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
+      {showComments && (
+        <div style={{ marginTop: "1rem", maxHeight: "300px", overflowY: "auto" }}>
+          {comments.length === 0 ? (
+            <p style={{ fontStyle: "italic", color: "#666" }}>No comments yet.</p>
+          ) : (
+            comments.map((c, i) => (
               <div
+                key={i}
                 style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: "50%",
-                  backgroundColor: "#007bff",
-                  color: "white",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "bold",
-                  textTransform: "uppercase",
-                  flexShrink: 0,
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  padding: "10px 0",
+                  borderBottom: "1px solid #eee",
                 }}
               >
-                {c.user?.name?.charAt(0) || "A"}
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    backgroundColor: "#4f46e5",
+                    color: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "bold",
+                    textTransform: "uppercase",
+                    fontSize: "14px",
+                    flexShrink: 0,
+                  }}
+                >
+                  {c.user?.name?.charAt(0) || "U"}
+                </div>
+                <div>
+                  <strong>{c.user?.name || "Unknown user"}</strong>
+                  <p style={{ margin: "4px 0" }}>{c.text}</p>
+                  <small style={{ color: "#999" }}>
+                    {new Date(c.date).toLocaleString()}
+                  </small>
+                </div>
               </div>
-
-              <div>
-                <strong>{c.user?.name || "Anonymous"}</strong>: {c.text}
-                <br />
-                <small style={{ color: "#999" }}>
-                  {new Date(c.date).toLocaleString()}
-                </small>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      )}
     </div>
   );
 };

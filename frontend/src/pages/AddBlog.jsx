@@ -5,7 +5,6 @@ import BlogForm from "../components/BlogForm";
 const AddBlog = () => {
   return (
     <div className="p-4 max-w-3xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-4">Create New Blog</h2>
       <BlogForm />
     </div>
   );

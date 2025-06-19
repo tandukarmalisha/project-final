@@ -1,154 +1,14 @@
-// import React, { useState } from "react";
-// import axios from "axios";
-
-// const categoriesList = [
-//   "Nature",
-//   "Music",
-//   "Bollywood",
-//   "Sports",
-//   "Programming",
-// ];
-
-// const BlogForm = () => {
-//   const [form, setForm] = useState({
-//     title: "",
-//     image: null,
-//     content: "",
-//     category: "", // single category string now
-//   });
-
-//   const handleChange = (e) => {
-//     const { name, value, files } = e.target;
-//     if (name === "image") {
-//       setForm((prev) => ({ ...prev, image: files[0] }));
-//     } else {
-//       setForm((prev) => ({ ...prev, [name]: value }));
-//     }
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     const token = localStorage.getItem("token");
-//     let imageUrl = "";
-
-//     try {
-//       if (form.image) {
-//         const imgData = new FormData();
-//         imgData.append("image", form.image);
-
-//         const uploadRes = await axios.post(
-//           "http://localhost:8000/api/upload",
-//           imgData,
-//           {
-//             headers: {
-//               Authorization: `Bearer ${token}`,
-//               "Content-Type": "multipart/form-data",
-//             },
-//           }
-//         );
-
-//         imageUrl = uploadRes.data.imageUrl;
-//       }
-
-//       const res = await axios.post(
-//         "http://localhost:8000/api/blog",
-//         {
-//           title: form.title,
-//           image: imageUrl,
-//           content: form.content,
-//           categories: form.category ? [form.category] : [],
-//         },
-//         {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         }
-//       );
-
-//       alert("Blog created!");
-//       console.log(res.data);
-
-//       setForm({
-//         title: "",
-//         image: null,
-//         content: "",
-//         category: "",
-//       });
-//     } catch (err) {
-//       console.error(err.response?.data || err.message);
-//       alert("Something went wrong!");
-//     }
-//   };
-
-//   return (
-//     <form
-//       onSubmit={handleSubmit}
-//       className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md space-y-5"
-//     >
-//       <input
-//         type="text"
-//         name="title"
-//         placeholder="Title"
-//         value={form.title}
-//         onChange={handleChange}
-//         className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         required
-//       />
-
-//       <input
-//         type="file"
-//         name="image"
-//         accept="image/*"
-//         onChange={handleChange}
-//         className="w-full"
-//       />
-
-//       <textarea
-//         name="content"
-//         placeholder="Write your blog content here..."
-//         value={form.content}
-//         onChange={handleChange}
-//         className="w-full border border-gray-300 rounded-md px-4 py-3 h-64 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         required
-//         ></textarea>
-
-//       <select
-//         name="category"
-//         value={form.category}
-//         onChange={handleChange}
-//         className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-//         required
-//       >
-//         <option value="" disabled>
-//           Select a category
-//         </option>
-//         {categoriesList.map((cat) => (
-//           <option key={cat} value={cat}>
-//             {cat}
-//           </option>
-//         ))}
-//       </select>
-
-//       <button
-//         type="submit"
-//         className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
-//       >
-//         Publish Blog
-//       </button>
-//     </form>
-//   );
-// };
-
-// export default BlogForm;
 
 
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 
+
 const BlogForm = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     title: "",
     image: null,
@@ -222,6 +82,7 @@ const BlogForm = () => {
       );
 
     toast.success("✅ Blog published successfully!");
+    navigate("/profile");
       console.log(res.data);
 
       setForm({
@@ -384,6 +245,7 @@ const BlogForm = () => {
             style={styles.button}
             onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#1e40af")}
             onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#2563eb")}
+            
           >
             Publish Blog
           </button>

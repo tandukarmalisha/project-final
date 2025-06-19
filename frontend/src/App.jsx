@@ -9,6 +9,7 @@ import Home from "./pages/Home"; // This is your landing blog page
 import Dashboard from "./pages/Dashboard";
 import AddBlog from "./pages/AddBlog";
 import ProfilePage from "./pages/ProfilePage";
+import BlogDetail from "./pages/BlogDetail";
 import { ToastContainer } from "react-toastify";
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
         <Route path = "/dashboard" element={<Dashboard />} />
         <Route path = "/add-blog" element={<AddBlog />} />
         <Route path = "/profile" element = {<ProfilePage/>}/>
+        <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="*" element={<div>Page Not Found</div>} />
 
       </Routes>

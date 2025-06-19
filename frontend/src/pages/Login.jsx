@@ -44,7 +44,7 @@ const handleSubmit = async (e) => {
     localStorage.setItem("user", JSON.stringify(user));  // Save user info too!
 
     toast.success("✅ loginsuccessfully!");
-    navigate("/dashboard");
+    navigate("/");
   } catch (err) {
     const msg = err.response?.data?.message || "Login failed. Try again.";
     setError(msg);

@@ -17,12 +17,19 @@ const ProfilePage = () => {
       return;
     }
 
+    const userId = userData._id || userData.id;
+
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
+
     setUser(userData);
 
     const fetchUserBlogs = async () => {
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/blogs/user/${userData._id}`,
+          `http://localhost:8000/api/blog/user/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -42,63 +49,163 @@ const ProfilePage = () => {
 
   return (
     <>
-     
-
-      <div style={{ padding: "2rem", maxWidth: "800px", margin: "auto" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+      <div
+        style={{
+          maxWidth: 900,
+          margin: "40px auto",
+          padding: "2rem",
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+          color: "#222",
+        }}
+      >
+        {/* User info */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
           <div
             style={{
               backgroundColor: "#4f46e5",
               color: "white",
               borderRadius: "50%",
-              width: "48px",
-              height: "48px",
+              width: 56,
+              height: 56,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontWeight: "bold",
-              fontSize: "1.2rem",
+              fontWeight: "700",
+              fontSize: "1.5rem",
               textTransform: "uppercase",
+              boxShadow: "0 0 8px rgba(79, 70, 229, 0.6)",
+              userSelect: "none",
             }}
           >
-            {user?.name?.charAt(0)}
+            {user?.name?.charAt(0) || "U"}
           </div>
-          <h2>{user?.name}'s Profile</h2>
+          <h1
+            style={{
+              fontSize: "2rem",
+              fontWeight: "700",
+              margin: 0,
+              color: "#333",
+            }}
+          >
+            {user?.name}'s Profile
+          </h1>
         </div>
 
-        <hr style={{ margin: "1rem 0" }} />
+        <hr
+          style={{
+            border: "none",
+            height: 1,
+            backgroundColor: "#e5e7eb",
+            marginBottom: "2rem",
+          }}
+        />
 
-        <h3>Your Posts:</h3>
+        <h2 style={{ marginBottom: "1.5rem", color: "#4f46e5" }}>Your Posts</h2>
 
         {Array.isArray(userBlogs) && userBlogs.length === 0 ? (
-          <p style={{ marginTop: "1rem" }}>You haven't posted any blogs yet.</p>
+          <p
+            style={{
+              fontSize: "1.1rem",
+              color: "#666",
+              fontStyle: "italic",
+              textAlign: "center",
+              marginTop: "2rem",
+            }}
+          >
+            You haven't posted any blogs yet.
+          </p>
         ) : (
-          Array.isArray(userBlogs) &&
-          userBlogs.map((blog) => (
-            <div
-              key={blog._id}
-              style={{
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                padding: "1rem",
-                marginBottom: "1rem",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                cursor: "pointer",
-              }}
-              onClick={() => navigate(`/blog/${blog._id}`)}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.1)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.boxShadow = "none")
-              }
-            >
-              <h4>{blog.title}</h4>
-              <p style={{ color: "#555" }}>
-                {blog.content.substring(0, 120)}...
-              </p>
-            </div>
-          ))
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))",
+              gap: "1.5rem",
+            }}
+          >
+            {userBlogs.map((blog) => (
+              <div
+                key={blog._id}
+                onClick={() => navigate(`/blog/${blog._id}`)}
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: 12,
+                  boxShadow:
+                    "0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1)",
+                  padding: "1.2rem 1.5rem",
+                  cursor: "pointer",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  minHeight: 140,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-6px)";
+                  e.currentTarget.style.boxShadow =
+                    "0 12px 24px rgba(79, 70, 229, 0.15)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow =
+                    "0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1)";
+                }}
+              >
+                <h3
+                  style={{
+                    margin: "0 0 0.6rem 0",
+                    fontWeight: "700",
+                    color: "#1f2937",
+                    fontSize: "1.2rem",
+                    lineHeight: "1.3",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                  title={blog.title}
+                >
+                  {blog.title}
+                </h3>
+                <p
+                  style={{
+                    flexGrow: 1,
+                    margin: "0 0 1rem 0",
+                    color: "#4b5563",
+                    fontSize: "0.95rem",
+                    lineHeight: "1.4",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                  }}
+                  title={blog.content}
+                >
+                  {blog.content}
+                </p>
+                <div
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "#6b7280",
+                    borderTop: "1px solid #e5e7eb",
+                    paddingTop: 8,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    userSelect: "none",
+                  }}
+                >
+                  <span>👍 {blog.likes?.length || 0}</span>
+                  <span>💬 {blog.comments?.length || 0}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </>

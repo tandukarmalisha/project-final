@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -12,7 +13,7 @@ const Register = () => {
   });
   const [errors, setErrors] = useState({});
   const [serverMsg, setServerMsg] = useState("");
-  const [popupError, setPopupError] = useState(""); // popup error state
+  const [popupError, setPopupError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,11 +24,15 @@ const Register = () => {
     e.preventDefault();
     setErrors({});
     setServerMsg("");
+
     try {
       const res = await axios.post("http://localhost:8000/api/auth/register", form, {
         withCredentials: true,
       });
+
       setServerMsg(res.data.message);
+      toast.success("🎉 Registered successfully! Please log in.");
+
       setForm({
         name: "",
         email: "",
@@ -35,6 +40,9 @@ const Register = () => {
         confirmPassword: "",
         gender: "female",
       });
+
+      navigate("/login"); // ✅ Redirect to login
+
     } catch (err) {
       if (err.response?.data?.errors) {
         const fieldErrors = {};
@@ -44,9 +52,11 @@ const Register = () => {
         const message = err.response?.data?.message || "Something went wrong.";
         if (message === "Email already registered") {
           setPopupError(message);
-          setTimeout(() => setPopupError(""), 7000); // Hide after 4 seconds
+          setTimeout(() => setPopupError(""), 7000);
+          toast.error("❌ Email already registered. Try logging in.");
         } else {
           setServerMsg(message);
+          toast.error("❌ " + message);
         }
       }
     }
@@ -57,7 +67,6 @@ const Register = () => {
       <h2>Register</h2>
       {serverMsg && <p>{serverMsg}</p>}
 
-      {/* Popup error */}
       {popupError && (
         <div className="popup-error">
           {popupError}
