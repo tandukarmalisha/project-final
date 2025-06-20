@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const Blog = require('./blog.model');
+const blogService = require("./blog.service"); // ✅ Required to call getRecommendations
+
 
 // Create Blog
 exports.createBlog = async (req, res) => {
@@ -363,6 +365,35 @@ exports.deleteBlog = async (req, res) => {
   } catch (err) {
     console.error("❗ Delete blog error:", err);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+exports.getUserRecommendations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Find all blogs liked by this user
+    const likedBlogs = await Blog.find({ likes: userId });
+
+    // Collect categories from those blogs
+    const likedCategories = [...new Set(likedBlogs.flatMap(blog => blog.categories))];
+
+    // If no liked categories, send empty
+    if (!likedCategories.length) return res.status(200).json([]);
+
+    // Find blogs in same categories, excluding already liked ones
+    const recommended = await Blog.find({
+      categories: { $in: likedCategories },
+      likes: { $ne: userId },
+    })
+    .limit(5)
+    .sort({ createdAt: -1 });
+
+    res.status(200).json(recommended);
+  } catch (err) {
+    console.error("Recommendation error:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
