@@ -216,12 +216,22 @@ const BlogForm = () => {
             <option value="" disabled>
               Select a category
             </option>
-            <option value="Nature">Nature</option>
-            <option value="Music">Music</option>
-            <option value="Bollywood">Bollywood</option>
-            <option value="Sports">Sports</option>
+            <option value="Technology">Technology</option>
             <option value="Programming">Programming</option>
+            <option value="Lifestyle">Lifestyle</option>
             <option value="Entertainment">Entertainment</option>
+            <option value="Music">Music</option>
+            <option value="Movies">Movies</option>
+            <option value="Sports">Sports</option>
+            <option value="Travel">Travel</option>
+            <option value="Food">Food</option>
+            <option value="Nature">Nature</option>
+            <option value="Health">Health</option>
+            <option value="Education">Education</option>
+            <option value="Bollywood">Bollywood</option>
+            <option value="Fashion">Fashion</option>
+            <option value="Personal">Personal</option>
+            <option value="News">News</option>
           </select>
 
           <textarea

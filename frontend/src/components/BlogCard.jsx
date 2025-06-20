@@ -7,7 +7,6 @@ import { faHeart as regularHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as solidHeart } from "@fortawesome/free-solid-svg-icons";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
-
 const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
   const [likes, setLikes] = useState(blog.likes || []);
   const [comments, setComments] = useState(blog.comments || []);
@@ -16,15 +15,19 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
   const [showComments, setShowComments] = useState(false);
 
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   const likedByUser =
     Array.isArray(likes) && currentUserId
-      ? likes.some((id) => id?.toString() === currentUserId.toString())
+      ? likes.some((id) =>
+          typeof id === "string"
+            ? id === currentUserId
+            : id?._id?.toString() === currentUserId
+        )
       : false;
 
   const handleLike = async () => {
     try {
-      const token = localStorage.getItem("token");
       if (!token) {
         toast.info("Please register or login to interact with blogs.");
         navigate("/register");
@@ -56,7 +59,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
     if (!newComment.trim()) return;
 
     try {
-      const token = localStorage.getItem("token");
       if (!token) {
         navigate("/register");
         return;
@@ -99,7 +101,14 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
         cursor: "pointer",
         transition: "box-shadow 0.2s ease-in-out",
       }}
-      onClick={() => navigate(`/blog/${blog._id}`)}
+      onClick={() => {
+        if (!token) {
+          toast.info("Please register or login to view blog details.");
+          navigate("/register");
+        } else {
+          navigate(`/blog/${blog._id}`);
+        }
+      }}
       onMouseEnter={(e) =>
         (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.1)")
       }
@@ -157,8 +166,13 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
               cursor: "pointer",
             }}
             onClick={(e) => {
-              e.stopPropagation(); // prevent navigating twice
-              navigate(`/blog/${blog._id}`);
+              e.stopPropagation();
+              if (!token) {
+                toast.info("Please register or login to view blog details.");
+                navigate("/register");
+              } else {
+                navigate(`/blog/${blog._id}`);
+              }
             }}
           >
             Read more
@@ -178,7 +192,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
           marginTop: 16,
           alignItems: "center",
         }}
-        onClick={(e) => e.stopPropagation()} // prevent card click
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={handleLike}
@@ -194,9 +208,21 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
           }}
         >
           <FontAwesomeIcon
-            icon={likedByUser ? solidHeart : regularHeart}
-            style={{ color: likedByUser ? "red" : "#444" }}
-          />
+          icon={likedByUser ? solidHeart : regularHeart}
+          style={{
+            color: likedByUser ? "red" : "#444",
+            fontSize: 35,
+            transition: "color 0.3s ease",
+          }}
+        />
+{/* 
+            <div style={{ color: likedByUser ? "red" : "#444" }}>
+  ❤️ Like ({likes.length})
+</div> */}
+
+        
+
+
           Like ({likes.length})
         </button>
 
@@ -233,7 +259,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
         </button>
       </div>
 
-      {/* Comment Input */}
       {showCommentInput && (
         <form
           onSubmit={handleCommentSubmit}
@@ -281,7 +306,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
         </form>
       )}
 
-      {/* Comments List */}
       {showComments && (
         <div style={{ marginTop: "1rem", maxHeight: "300px", overflowY: "auto" }}>
           {comments.length === 0 ? (

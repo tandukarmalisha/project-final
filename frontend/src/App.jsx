@@ -13,6 +13,8 @@ import BlogDetail from "./pages/BlogDetail";
 import UpdateBlogPage from "./pages/UpdateBlogPage";
 import "react-toastify/dist/ReactToastify.css"; // Import toastify styles
 import { ToastContainer } from "react-toastify";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+
 
 function App() {
   return (

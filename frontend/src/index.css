@@ -106,7 +106,10 @@ p {
   100% {opacity: 0; transform: translateY(-10px);}
 }
 
+.heart {
+  transition: transform 0.2s ease;
+}
 
-
-
-
+.heart:active {
+  transform: scale(1.2);
+}
