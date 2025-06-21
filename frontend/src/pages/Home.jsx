@@ -14,7 +14,7 @@ const Home = () => {
 
   const fetchRecommendations = async () => {
     try {
-      if (!token || !user?._id) return;
+      if (!token || !user?.id) return;
       const { data } = await axios.get(
         "http://localhost:8000/api/blog/user/recommendations",
         {
@@ -46,7 +46,7 @@ const Home = () => {
 
       setTrendingBlogs(trending);
 
-      if (user?._id) setCurrentUserId(user._id);
+      if (user?.id) setCurrentUserId(user.id);
       await fetchRecommendations();
     } catch (error) {
       console.error("Error loading blogs:", error);
@@ -98,7 +98,7 @@ const Home = () => {
           >
             {recommendedBlogs.map((blog) => (
               <BlogCard
-                key={blog._id}
+                key={blog.id}
                 blog={blog}
                 currentUserId={currentUserId}
                 onLikeToggle={fetchRecommendations}
@@ -141,7 +141,7 @@ const Home = () => {
             ) : (
               visibleBlogs.map((blog) => (
                 <BlogCard
-                  key={blog._id}
+                  key={blog.id}
                   blog={blog}
                   currentUserId={currentUserId}
                   onLikeToggle={fetchRecommendations}
@@ -197,7 +197,7 @@ const Home = () => {
           >
             {trendingBlogs.map((blog) => (
               <BlogCard
-                key={blog._id}
+                key={blog.id}
                 blog={blog}
                 currentUserId={currentUserId}
                 onLikeToggle={fetchRecommendations}
