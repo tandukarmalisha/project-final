@@ -190,7 +190,7 @@ const BlogDetail = () => {
           }}
           title={likedByUser ? "Unlike" : "Like"}
         >
-          ❤️ Like ({blog.likes?.length || 0})
+          Like ({blog.likes?.length || 0})
         </button>
 
         <br />

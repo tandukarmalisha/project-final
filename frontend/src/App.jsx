@@ -11,6 +11,7 @@ import AddBlog from "./pages/AddBlog";
 import ProfilePage from "./pages/ProfilePage";
 import BlogDetail from "./pages/BlogDetail";
 import UpdateBlogPage from "./pages/UpdateBlogPage";
+import CategoryPage from "./pages/CategoryPage";
 import "react-toastify/dist/ReactToastify.css"; // Import toastify styles
 import { ToastContainer } from "react-toastify";
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -33,8 +34,8 @@ function App() {
         <Route path = "/profile" element = {<ProfilePage/>}/>
         <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/update-blog/:id" element={<UpdateBlogPage />} />
+        <Route path="/category/:categoryName" element={<CategoryPage />} />
         <Route path="*" element={<div>Page Not Found</div>} />
-        {/* <Route path="/category/:categoryName" element={<CategoryPage />} /> */}
 
 
       </Routes>

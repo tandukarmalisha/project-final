@@ -249,7 +249,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
             color: "#444",
           }}
         >
-          💬 Comments ({comments.length})
+          Comments ({comments.length})
         </button>
 
         <button
@@ -264,7 +264,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
             color: "#444",
           }}
         >
-          ✍️ Add Comment
+           Add Comment
         </button>
       </div>
 
