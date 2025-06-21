@@ -18,6 +18,8 @@ router.patch('/:id/comment', verifyToken, blogController.addComment);
 router.delete("/:blogId/comment/:commentId", protect, blogController.deleteComment);
 router.get('/user/recommendations', verifyToken, blogController.getUserRecommendations);
 router.get('/trending', blogController.getTrendingBlogs);
+router.get("/category/:category", blogController.getBlogsByCategory);
+
 
 
 

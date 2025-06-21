@@ -668,3 +668,20 @@ exports.getTrendingBlogs = async (req, res) => {
   }
 };
 
+// GET /api/blog/category/:category
+exports.getBlogsByCategory = async (req, res) => {
+  try {
+    const category = req.params.category;
+
+    const blogs = await Blog.find({
+      categories: { $regex: new RegExp(`^${category}$`, "i") }, // case-insensitive match
+    })
+      .populate("author", "name email") // optional
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(blogs);
+  } catch (error) {
+    console.error("Error fetching blogs by category:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
