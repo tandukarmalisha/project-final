@@ -5,9 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as regularHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as solidHeart } from "@fortawesome/free-solid-svg-icons";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
-const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
+const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
   const [likes, setLikes] = useState(blog.likes || []);
   const [comments, setComments] = useState(blog.comments || []);
   const [newComment, setNewComment] = useState("");
@@ -42,7 +41,9 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
 
       if (res.data && Array.isArray(res.data.likes)) {
         setLikes(res.data.likes);
-        onLikeToggle && onLikeToggle(blog._id, res.data.likes);
+        if (onLikeToggle) {
+          onLikeToggle();
+        }
       }
     } catch (error) {
       if (error.response?.status === 401) {
@@ -84,9 +85,11 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
     }
   };
 
+  // Truncate content for compact mode to ~1 line (~70 chars)
+  const truncateLength = compact ? 70 : 250;
   const truncatedContent =
-    blog.content.length > 250
-      ? `${blog.content.substring(0, 250)}... `
+    blog.content.length > truncateLength
+      ? `${blog.content.substring(0, truncateLength)}... `
       : blog.content;
 
   return (
@@ -94,12 +97,18 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
       style={{
         border: "1px solid #ccc",
         borderRadius: 8,
-        padding: 20,
+        padding: 16,
         marginBottom: 20,
         backgroundColor: "#fff",
         boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
         cursor: "pointer",
         transition: "box-shadow 0.2s ease-in-out",
+        width: "100%",
+        maxHeight: compact ? 280 : "none",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
       onClick={() => {
         if (!token) {
@@ -117,11 +126,11 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
       }
     >
       {/* Author */}
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 16 }}>
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
         <div
           style={{
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             borderRadius: "50%",
             backgroundColor: "#4f46e5",
             color: "#fff",
@@ -130,17 +139,19 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
             justifyContent: "center",
             fontWeight: "bold",
             textTransform: "uppercase",
-            fontSize: 18,
+            fontSize: 16,
             marginRight: 10,
           }}
         >
           {blog.author?.name?.charAt(0) || "U"}
         </div>
-        <strong>{blog.author?.name || "Unknown User"}</strong>
+        <strong style={{ fontSize: compact ? 14 : 16 }}>
+          {blog.author?.name || "Unknown User"}
+        </strong>
       </div>
 
       {/* Blog Content */}
-      <h2>{blog.title}</h2>
+      <h3 style={{ fontSize: compact ? 18 : 24, marginBottom: 10 }}>{blog.title}</h3>
 
       {blog.image && (
         <img
@@ -148,7 +159,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
           alt="Blog"
           style={{
             width: "100%",
-            maxHeight: 300,
+            maxHeight: compact ? 110 : 200,
             objectFit: "cover",
             borderRadius: 6,
             marginBottom: 10,
@@ -156,13 +167,13 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
         />
       )}
 
-      <p style={{ marginTop: "1rem" }}>
+      <p style={{ marginTop: "0.5rem", fontSize: compact ? 14 : 16, lineHeight: 1.3 }}>
         {truncatedContent}
-        {blog.content.length > 250 && (
+        {blog.content.length > truncateLength && (
           <span
             style={{
               color: "#4f46e5",
-              fontWeight: "bold",
+              fontWeight: "600",
               cursor: "pointer",
             }}
             onClick={(e) => {
@@ -180,7 +191,15 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
         )}
       </p>
 
-      <p>
+      <p
+        style={{
+          fontSize: compact ? 13 : 15,
+          color: "#555",
+          fontStyle: "italic",
+          marginTop: 6,
+          marginBottom: 12,
+        }}
+      >
         <strong>Category:</strong> {blog.categories?.join(", ")}
       </p>
 
@@ -188,9 +207,10 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
       <div
         style={{
           display: "flex",
-          gap: 16,
-          marginTop: 16,
+          gap: 12,
+          marginTop: "auto",
           alignItems: "center",
+          fontSize: compact ? 14 : 16,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -200,7 +220,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
             cursor: "pointer",
             background: "none",
             border: "none",
-            fontSize: 16,
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -208,21 +227,13 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
           }}
         >
           <FontAwesomeIcon
-          icon={likedByUser ? solidHeart : regularHeart}
-          style={{
-            color: likedByUser ? "red" : "#444",
-            fontSize: 35,
-            transition: "color 0.3s ease",
-          }}
-        />
-{/* 
-            <div style={{ color: likedByUser ? "red" : "#444" }}>
-  ❤️ Like ({likes.length})
-</div> */}
-
-        
-
-
+            icon={likedByUser ? solidHeart : regularHeart}
+            style={{
+              color: likedByUser ? "red" : "#444",
+              fontSize: compact ? 24 : 35,
+              transition: "color 0.3s ease",
+            }}
+          />
           Like ({likes.length})
         </button>
 
@@ -232,7 +243,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
             cursor: "pointer",
             background: "none",
             border: "none",
-            fontSize: 16,
             display: "flex",
             alignItems: "center",
             gap: 6,
@@ -248,7 +258,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle }) => {
             cursor: "pointer",
             background: "none",
             border: "none",
-            fontSize: 16,
             display: "flex",
             alignItems: "center",
             gap: 6,

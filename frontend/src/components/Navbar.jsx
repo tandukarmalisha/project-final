@@ -30,11 +30,11 @@ const Navbar = () => {
   const linkContainerStyle = {
     display: "flex",
     alignItems: "center",
-    gap: "1.5rem",
+    gap: "1rem",
   };
 
   const linkStyle = {
-    fontSize: "1.1rem",
+    fontSize: "1rem",
     textDecoration: "none",
     color: "#f3f4f6",
     fontWeight: 500,
@@ -84,7 +84,7 @@ const Navbar = () => {
               onMouseOver={(e) => (e.target.style.color = "#38bdf8")} // sky-400
               onMouseOut={(e) => (e.target.style.color = "#f3f4f6")}
             >
-              ➕ Add Blog
+               Add Blog
             </Link>
 
             {/* Search bar */}

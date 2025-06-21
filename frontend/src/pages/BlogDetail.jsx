@@ -1,33 +1,114 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const BlogDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [blog, setBlog] = useState(null);
   const [showComments, setShowComments] = useState(false);
+  const [showCommentInput, setShowCommentInput] = useState(false);
+  const [newComment, setNewComment] = useState("");
   const [recommendedBlogs, setRecommendedBlogs] = useState([]);
-  const [latestBlogs, setLatestBlogs] = useState([]); // New state
+  const [latestBlogs, setLatestBlogs] = useState([]);
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    // Fetch current blog details
-    fetch(`${import.meta.env.VITE_API_BASE_URL}/blog/${id}`)
-      .then((res) => res.json())
-      .then((data) => setBlog(data))
-      .catch((err) => console.error(err));
-
-    // Fetch recommended blogs for this blog
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/blog/${id}/recommendations`)
-      .then((res) => setRecommendedBlogs(res.data))
-      .catch((err) => console.error("Recommendation error:", err));
-
-    // Fetch latest blogs
-    axios
-      .get(`${import.meta.env.VITE_API_BASE_URL}/blog/latest`)
-      .then((res) => setLatestBlogs(res.data))
-      .catch((err) => console.error("Latest blogs error:", err));
+    fetchBlog();
+    fetchRecommendedBlogs();
+    fetchLatestBlogs();
   }, [id]);
+
+  const fetchBlog = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/blog/${id}`);
+      setBlog(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchRecommendedBlogs = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/blog/${id}/recommendations`);
+      setRecommendedBlogs(res.data);
+    } catch (error) {
+      console.error("Recommendation error:", error);
+    }
+  };
+
+  const fetchLatestBlogs = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/blog/latest`);
+      setLatestBlogs(res.data);
+    } catch (error) {
+      console.error("Latest blogs error:", error);
+    }
+  };
+
+  const likedByUser = blog?.likes?.some((like) =>
+    typeof like === "string" ? like === user?._id : like?._id === user?._id
+  );
+
+  const handleLike = async () => {
+    if (!token) {
+      toast.info("Please register or login to like the blog.");
+      navigate("/register");
+      return;
+    }
+    try {
+      const res = await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/blog/${id}/like`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setBlog((prev) => ({ ...prev, likes: res.data.likes }));
+    } catch (error) {
+      if (error.response?.status === 401) {
+        toast.info("Session expired. Please login again.");
+        navigate("/register");
+      } else {
+        console.error("Like error:", error.response?.data || error.message);
+      }
+    }
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
+
+    if (!token) {
+      toast.info("Please register or login to comment.");
+      navigate("/register");
+      return;
+    }
+
+    try {
+      const res = await axios.patch(
+        `${import.meta.env.VITE_API_BASE_URL}/blog/${id}/comment`,
+        { comment: newComment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setBlog((prev) => ({
+        ...prev,
+        comments: [...(prev.comments || []), res.data.comment],
+      }));
+      setNewComment("");
+      setShowComments(true);
+      setShowCommentInput(false);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        toast.info("Session expired. Please login again.");
+        navigate("/register");
+      } else {
+        console.error("Comment error:", error.response?.data || error.message);
+      }
+    }
+  };
 
   if (!blog)
     return <div style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
@@ -35,7 +116,7 @@ const BlogDetail = () => {
   return (
     <div
       style={{
-        maxWidth: "1000%",
+        maxWidth: "1000px",
         margin: "40px auto",
         padding: "2rem",
         background: "#fff",
@@ -96,13 +177,46 @@ const BlogDetail = () => {
           paddingTop: "1.5rem",
         }}
       >
-        <p style={{ fontSize: "1rem", color: "#333", marginBottom: "1rem" }}>
-          ❤️ <strong>Likes:</strong> {blog.likes?.length || 0}
-        </p>
+        <button
+          onClick={handleLike}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "1.1rem",
+            color: likedByUser ? "red" : "#444",
+            fontWeight: "bold",
+            marginBottom: "1rem",
+          }}
+          title={likedByUser ? "Unlike" : "Like"}
+        >
+          ❤️ Like ({blog.likes?.length || 0})
+        </button>
+
+        <br />
 
         <button
           onClick={() => setShowComments(!showComments)}
           style={{
+            width:"200px",
+            // background: "#4f46e5",
+            // color: "#fff",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            marginRight: "1rem",
+          }}
+        >
+          {showComments ? "Hide Comments" : "Show Comments"}
+        </button>
+
+        <button
+          onClick={() => setShowCommentInput((prev) => !prev)}
+          style={{
+            width:"200px",
             background: "#4f46e5",
             color: "#fff",
             border: "none",
@@ -111,11 +225,52 @@ const BlogDetail = () => {
             cursor: "pointer",
             fontSize: "1rem",
             fontWeight: "bold",
-            width: "20%",
           }}
         >
-          {showComments ? "Hide Comments" : "Show Comments"}
+          {showCommentInput ? "Cancel" : "Add Comment"}
         </button>
+
+        {showCommentInput && (
+          <form
+            onSubmit={handleCommentSubmit}
+            style={{
+              marginTop: "1rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+              maxWidth: "500px",
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Write a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              style={{
+                padding: "10px 14px",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+                outline: "none",
+                fontSize: "1rem",
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                padding: "10px 14px",
+                borderRadius: "6px",
+                backgroundColor: "#4f46e5",
+                color: "#fff",
+                fontWeight: "bold",
+                border: "none",
+                cursor: "pointer",
+                width: "fit-content",
+              }}
+            >
+              Post Comment
+            </button>
+          </form>
+        )}
 
         {showComments && (
           <div style={{ marginTop: "2rem" }}>
@@ -133,12 +288,14 @@ const BlogDetail = () => {
                     <strong>{comment.user?.name || "Anonymous"}:</strong> {comment.text}
                   </p>
                   <small style={{ color: "#888" }}>
-                    {comment.createdAt ? new Date(comment.createdAt).toLocaleString() : ""}
+                    {comment.createdAt
+                      ? new Date(comment.createdAt).toLocaleString()
+                      : ""}
                   </small>
                 </div>
               ))
             ) : (
-              <p style={{ fontStyle: "italic", color: "#888" }}>No comments yet.</p>
+              <p style={{  fontStyle: "italic", color: "#888" }}>No comments yet.</p>
             )}
           </div>
         )}

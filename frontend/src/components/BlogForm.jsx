@@ -72,7 +72,7 @@ const BlogForm = () => {
           title: form.title,
           image: imageUrl,
           content: form.content,
-          categories: form.categories,
+          categories: [form.categories],
         },
         {
           headers: {

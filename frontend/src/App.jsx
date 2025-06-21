@@ -28,12 +28,14 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/activate/:token" element={<ActivateAccount />} />
-        <Route path = "/dashboard" element={<Dashboard />} />
+        {/* <Route path = "/dashboard" element={<Dashboard />} /> */}
         <Route path = "/add-blog" element={<AddBlog />} />
         <Route path = "/profile" element = {<ProfilePage/>}/>
         <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/update-blog/:id" element={<UpdateBlogPage />} />
         <Route path="*" element={<div>Page Not Found</div>} />
+        {/* <Route path="/category/:categoryName" element={<CategoryPage />} /> */}
+
 
       </Routes>
     </Router>
