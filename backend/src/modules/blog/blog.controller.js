@@ -3,6 +3,13 @@
 
 const mongoose = require('mongoose');
 const Blog = require('./blog.model');
+const { exec } = require("child_process");
+const path = require("path");
+
+const scriptPath = path.join(__dirname, "../../recommendation/recommend.py");
+
+
+
 
 // Create Blog
 exports.createBlog = async (req, res) => {
@@ -284,3 +291,24 @@ exports.getBlogsByCategory = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+exports.getContentRecommendations = (req, res) => {
+  const blogTitle = req.params.title.trim();
+  const scriptPath = path.join(__dirname, "../recommendation/recommend.py");
+
+  exec(`python "${scriptPath}" "${blogTitle}"`, (error, stdout, stderr) => {
+    if (error) {
+      console.error("Python Error:", error.message);
+      return res.status(500).json({ message: "Recommendation failed" });
+    }
+
+    const recommendations = stdout
+      .split("\n")
+      .filter(line => line.startsWith("=>"))
+      .map(line => line.replace("=>", "").trim());
+
+    res.status(200).json({ recommendations });
+  });
+};
+
