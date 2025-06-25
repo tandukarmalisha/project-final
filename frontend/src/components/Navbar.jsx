@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import NotificationsDropdown from "./NotificationDropdown";
+import SearchUser from "./SearchUser";
+
 
 const categories = [
   "Technology", "Programming", "Lifestyle", "Entertainment", "Music",
@@ -91,73 +94,9 @@ const Navbar = () => {
           <>
             <Link to="/dashboard" style={linkStyle}>Add Blog</Link>
 
-            {/* Search bar with dropdown */}
-            <div style={{ position: "relative" }}>
-              <input
-                type="text"
-                placeholder="Search category..."
-                value={searchTerm}
-                onChange={handleSearchChange}
-                onKeyDown={(e) => {
-                  if (e.key === "ArrowDown") {
-                    setActiveIndex((prev) =>
-                      Math.min(prev + 1, filteredCategories.length - 1)
-                    );
-                  } else if (e.key === "ArrowUp") {
-                    setActiveIndex((prev) => Math.max(prev - 1, 0));
-                  } else if (e.key === "Enter" && filteredCategories[activeIndex]) {
-                    handleCategorySelect(filteredCategories[activeIndex]);
-                  }
-                }}
-                onBlur={() => setTimeout(() => setFilteredCategories([]), 200)}
-                style={{
-                  padding: "0.5rem 1rem",
-                  borderRadius: "9999px",
-                  border: "1px solid #d1d5db",
-                  outline: "none",
-                  fontSize: "1rem",
-                  backgroundColor: "#f9fafb",
-                  transition: "all 0.3s ease-in-out",
-                  width: "180px",
-                }}
-              />
+            <SearchUser />
 
-              {searchTerm && filteredCategories.length > 0 && (
-                <ul
-                  style={{
-                    position: "absolute",
-                    top: "110%",
-                    left: 0,
-                    right: 0,
-                    background: "#fff",
-                    listStyle: "none",
-                    padding: "0.5rem",
-                    margin: 0,
-                    border: "1px solid #ccc",
-                    borderRadius: "0.5rem",
-                    zIndex: 1000,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  {filteredCategories.map((category, index) => (
-                    <li
-                      key={category}
-                      onClick={() => handleCategorySelect(category)}
-                      style={{
-                        padding: "0.5rem 1rem",
-                        cursor: "pointer",
-                        fontWeight: 500,
-                        borderRadius: "0.25rem",
-                        backgroundColor:
-                          index === activeIndex ? "#f3f4f6" : "transparent",
-                      }}
-                    >
-                      {category}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            <NotificationsDropdown />
 
             {/* Profile section */}
             <div

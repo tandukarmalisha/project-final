@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart as regularHeart } from "@fortawesome/free-regular-svg-icons";
 import { faHeart as solidHeart } from "@fortawesome/free-solid-svg-icons";
@@ -85,7 +85,6 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
     }
   };
 
-  // Truncate content for compact mode to ~1 line (~70 chars)
   const truncateLength = compact ? 70 : 250;
   const truncatedContent =
     blog.content.length > truncateLength
@@ -125,7 +124,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
         (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)")
       }
     >
-      {/* Author */}
+      {/* Author Section */}
       <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
         <div
           style={{
@@ -145,14 +144,28 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
         >
           {blog.author?.name?.charAt(0) || "U"}
         </div>
-        <strong style={{ fontSize: compact ? 14 : 16 }}>
-          {blog.author?.name || "Unknown User"}
-        </strong>
+
+        {/* Stop click from going to blog detail */}
+        <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", flexDirection: "column" }}>
+          <Link
+            to={`/user/${blog.author?._id}`}
+            style={{
+              fontSize: compact ? 14 : 16,
+              fontWeight: "bold",
+              color: "#4f46e5",
+              textDecoration: "none",
+            }}
+          >
+            {blog.author?.name || "Unknown User"}
+          </Link>
+          <small style={{ fontSize: 12, color: "#888" }}>View Profile</small>
+        </div>
       </div>
 
-      {/* Blog Content */}
+      {/* Blog Title */}
       <h3 style={{ fontSize: compact ? 18 : 24, marginBottom: 10 }}>{blog.title}</h3>
 
+      {/* Image */}
       {blog.image && (
         <img
           src={blog.image}
@@ -167,15 +180,12 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
         />
       )}
 
+      {/* Content Preview */}
       <p style={{ marginTop: "0.5rem", fontSize: compact ? 14 : 16, lineHeight: 1.3 }}>
         {truncatedContent}
         {blog.content.length > truncateLength && (
           <span
-            style={{
-              color: "#4f46e5",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
+            style={{ color: "#4f46e5", fontWeight: "600", cursor: "pointer" }}
             onClick={(e) => {
               e.stopPropagation();
               if (!token) {
@@ -191,15 +201,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
         )}
       </p>
 
-      <p
-        style={{
-          fontSize: compact ? 13 : 15,
-          color: "#555",
-          fontStyle: "italic",
-          marginTop: 6,
-          marginBottom: 12,
-        }}
-      >
+      <p style={{ fontSize: compact ? 13 : 15, color: "#555", fontStyle: "italic", marginTop: 6, marginBottom: 12 }}>
         <strong>Category:</strong> {blog.categories?.join(", ")}
       </p>
 
@@ -264,10 +266,11 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
             color: "#444",
           }}
         >
-           Add Comment
+          Add Comment
         </button>
       </div>
 
+      {/* Comment Input */}
       {showCommentInput && (
         <form
           onSubmit={handleCommentSubmit}
@@ -315,6 +318,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
         </form>
       )}
 
+      {/* Comment Display */}
       {showComments && (
         <div style={{ marginTop: "1rem", maxHeight: "300px", overflowY: "auto" }}>
           {comments.length === 0 ? (
@@ -352,9 +356,7 @@ const BlogCard = ({ blog, currentUserId, onLikeToggle, compact = false }) => {
                 <div>
                   <strong>{c.user?.name || "Unknown user"}</strong>
                   <p style={{ margin: "4px 0" }}>{c.text}</p>
-                  <small style={{ color: "#999" }}>
-                    {new Date(c.date).toLocaleString()}
-                  </small>
+                  <small style={{ color: "#999" }}>{new Date(c.date).toLocaleString()}</small>
                 </div>
               </div>
             ))
