@@ -87,22 +87,24 @@ const Navbar = () => {
       </Link>
       
       
-      <Link to="/recommend" style={linkStyle}>Recommendation</Link> {/* ✅ Added */}
 
 
       <div style={linkContainerStyle}>
         {!isLoggedIn ? (
           <>
-            <Link to="/login" style={linkStyle}>Login</Link>
-            <Link to="/register" style={linkStyle}>Register</Link>
+            {/* <Link to="/login" style={linkStyle}>Login</Link>
+            <Link to="/register" style={linkStyle}>Register</Link> */}
           </>
         ) : (
           <>
-            <Link to="/dashboard" style={linkStyle}>Add Blog</Link>
+            {/* <Link to="/add-blog" style={linkStyle}>Add Blog</Link> */}
 
-            <SearchUser />
+            {/* <Link to="/recommend" style={linkStyle}>Recommendation</Link> ✅ Added */}
 
-            <NotificationsDropdown />
+
+            {/* <SearchUser /> */}
+
+            {/* <NotificationsDropdown /> */}
 
             {/* Profile section */}
             <div
@@ -146,7 +148,7 @@ const Navbar = () => {
             </div>
 
             {/* Logout */}
-            <button
+            {/* <button
               onClick={handleLogout}
               style={{
                 ...linkStyle,
@@ -159,7 +161,7 @@ const Navbar = () => {
               onMouseOut={(e) => (e.target.style.color = "#f3f4f6")}
             >
               Logout
-            </button>
+            </button> */}
           </>
         )}
       </div>

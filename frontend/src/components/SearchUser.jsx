@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { FaSearch } from "react-icons/fa";
+import "./SearchUser.css";
 
 const SearchUser = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const navigate = useNavigate();
-  const dropdownRef = useRef(null); // ✅ Needed for outside click detection
+  const dropdownRef = useRef(null);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -35,7 +37,6 @@ const SearchUser = () => {
     navigate(`/user/${userId}`);
   };
 
-  // ✅ Hide dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -47,44 +48,27 @@ const SearchUser = () => {
   }, []);
 
   return (
-    <div style={{ margin: "20px", position: "relative" }} ref={dropdownRef}>
-      <form onSubmit={handleSearch} style={{ display: "flex", gap: "10px" }}>
+    <div className="search-container" ref={dropdownRef}>
+      <form onSubmit={handleSearch} className="search-form">
         <input
           type="text"
+          className="search-input"
           placeholder="Search users by name or email..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          style={{ padding: "8px", width: "250px", borderRadius: 4, border: "1px solid #ccc" }}
         />
-        <button
-          type="submit"
-          style={{ padding: "8px 12px", borderRadius: 4, border: "none", backgroundColor: "#4f46e5", color: "#fff" }}
-        >
-          Search
+        <button type="submit" className="search-button">
+          <FaSearch size={26} />
         </button>
       </form>
 
       {results.length > 0 && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            right: 0,
-            background: "#fff",
-            border: "1px solid #ccc",
-            borderRadius: "6px",
-            padding: "10px",
-            marginTop: "4px",
-            zIndex: 999,
-            boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
-          }}
-        >
+        <div className="search-dropdown">
           {results.map((user) => (
             <p
               key={user._id}
               onClick={() => handleSelect(user._id)}
-              style={{ cursor: "pointer", color: "#4f46e5", margin: "8px 0" }}
+              className="search-result"
             >
               {user.name} ({user.email})
             </p>
