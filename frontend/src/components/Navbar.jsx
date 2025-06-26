@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NotificationsDropdown from "./NotificationDropdown";
 import SearchUser from "./SearchUser";
+// import BlogSearchBox from "./BlogSearchBox"; // <-- Import here
+
 
 
 const categories = [
@@ -83,6 +85,10 @@ const Navbar = () => {
       <Link to="/" style={brandStyle}>
         IdeaFlux
       </Link>
+      
+      
+      <Link to="/recommend" style={linkStyle}>Recommendation</Link> {/* ✅ Added */}
+
 
       <div style={linkContainerStyle}>
         {!isLoggedIn ? (
