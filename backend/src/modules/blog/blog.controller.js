@@ -292,23 +292,68 @@ exports.getBlogsByCategory = async (req, res) => {
   }
 };
 
+// Get all blogs with full details for recommendations
+exports.getAllBlogsForRecommendation = async (req, res) => {
+  try {
+    const blogs = await Blog.find()
+      .populate("author", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ blogs });
+  } catch (error) {
+    console.error("Recommendation blog fetch error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+// exports.getContentRecommendations = (req, res) => {
+//   const userQuery = req.params.title.trim();
+//   const scriptPath = path.join(__dirname, "../recommendation/recommend.py");
+//   const command = `python "${scriptPath}" "${userQuery}"`;
+
+//   exec(command, (error, stdout, stderr) => {
+//     if (error) {
+//       console.error("Python Error:", error.message);
+//       return res.status(500).json({ message: "Recommendation failed" });
+//     }
+
+//     if (stderr) {
+//       console.warn("Python stderr:", stderr);
+//     }
+
+//     try {
+//       // ✅ Directly parse the Python JSON output
+//       const output = JSON.parse(stdout);
+//       return res.status(200).json(output); // Already in format: { recommendations: [...] }
+//     } catch (e) {
+//       console.error("JSON Parse Error:", e.message);
+//       return res.status(500).json({ message: "Invalid recommendation format" });
+//     }
+//   });
+// };
 
 exports.getContentRecommendations = (req, res) => {
-  const blogTitle = req.params.title.trim();
+  const userQuery = decodeURIComponent(req.params.title).trim(); // ✅ Fix added
   const scriptPath = path.join(__dirname, "../recommendation/recommend.py");
+  const command = `python "${scriptPath}" "${userQuery.replace(/"/g, '\\"')}"`; // Escape quotes if needed
 
-  exec(`python "${scriptPath}" "${blogTitle}"`, (error, stdout, stderr) => {
+  exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error("Python Error:", error.message);
       return res.status(500).json({ message: "Recommendation failed" });
     }
 
-    const recommendations = stdout
-      .split("\n")
-      .filter(line => line.startsWith("=>"))
-      .map(line => line.replace("=>", "").trim());
+    if (stderr) {
+      console.warn("Python stderr:", stderr);
+    }
 
-    res.status(200).json({ recommendations });
+    try {
+      const output = JSON.parse(stdout);
+      return res.status(200).json(output);
+    } catch (e) {
+      console.error("JSON Parse Error:", e.message);
+      return res.status(500).json({ message: "Invalid recommendation format" });
+    }
   });
 };
-

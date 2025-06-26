@@ -1,19 +1,23 @@
+
+
+
+
 # recommend.py
 import sys
 import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import json
 
 def main():
     if len(sys.argv) < 2:
-        print("No blog title provided.")
+        print("No input provided")
         return
 
-    # Get title from command-line argument
-    input_title = sys.argv[1].strip().lower()
+    query = sys.argv[1].strip().lower()
 
-    # 1. Fetch all blogs
-    response = requests.get("http://localhost:8000/api/blog/all")
+    # Fetch all blogs
+    response = requests.get("http://localhost:8000/api/blog/recommendation-data")
     data = response.json()
     blogs = data.get("blogs", [])
 
@@ -21,28 +25,36 @@ def main():
         print("No blogs found.")
         return
 
-    # 2. Extract titles and content
-    titles = [blog["title"] for blog in blogs]
-    contents = [blog["content"] for blog in blogs]
+    titles = [blog.get("title", "") for blog in blogs]
+    contents = [blog.get("content", "") for blog in blogs]
+    combined = [t + " " + c for t, c in zip(titles, contents)]
 
-    # 3. TF-IDF Vectorization
     vectorizer = TfidfVectorizer(stop_words="english")
-    tfidf_matrix = vectorizer.fit_transform(contents)
+    tfidf_matrix = vectorizer.fit_transform(combined)
 
-    # 4. Calculate Similarity Matrix
-    similarity_matrix = cosine_similarity(tfidf_matrix)
+    query_vec = vectorizer.transform([query])
+    similarity_scores = cosine_similarity(query_vec, tfidf_matrix).flatten()
 
-    # 5. Find blog index matching input title
-    try:
-        index = next(i for i, t in enumerate(titles) if t.lower() == input_title)
-    except StopIteration:
-        print(f"No blog found with title '{input_title}'")
-        return
+    top_indices = similarity_scores.argsort()[-3:][::-1]
 
-    # 6. Print recommendations (stdout for Node.js to read)
-    similar_indices = similarity_matrix[index].argsort()[-4:-1][::-1]  # exclude self
-    for i in similar_indices:
-        print(f"=> {titles[i]}")
+    results = []
+    for i in top_indices:
+        blog = blogs[i]
+        author = blog.get("author") or {}  # Safely fallback to empty dict
+
+        results.append({
+            "_id": blog.get("_id"),
+            "title": blog.get("title"),
+            "content": blog.get("content"),
+            "image": blog.get("image"),
+            "categories": blog.get("categories", []),
+            "author": {
+                "_id": author.get("_id"),
+                "name": author.get("name", "Unknown")
+            }
+        })
+
+    print(json.dumps({"recommendations": results}))
 
 if __name__ == "__main__":
     main()

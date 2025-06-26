@@ -16,6 +16,9 @@ router.get('/all', async (req, res) => {
 
 router.get('/trending', blogController.getTrendingBlogs);
 router.get('/category/:category', blogController.getBlogsByCategory);
+
+// 🔥 FIX: move this line ABOVE `/:id`
+router.get('/recommendation-data', blogController.getAllBlogsForRecommendation);
 router.get('/recommend-content/:title', blogController.getContentRecommendations);
 
 // General list — must be before dynamic `/:id`
