@@ -40,6 +40,7 @@ function App() {
           <Route path="/recommend" element={<RecommendPage />} />
           <Route path="/recommend/:title" element={<RecommendationResult />} />
           <Route path="/notifications" element={<NotificationDropDown/>} />
+          
         </Route>
 
         {/* Public/auth routes outside layout */}

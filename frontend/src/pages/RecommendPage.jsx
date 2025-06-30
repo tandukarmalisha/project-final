@@ -37,6 +37,7 @@ return (
       <h2 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1.5rem", color: "#D97706" /* yellow-500 */ }}>
         Blog Recommendations
       </h2>
+      <h2>Search here</h2>
 
       {/* Input group styles inline or you can move to CSS */}
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>

@@ -1,6 +1,8 @@
+// pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BlogCard from "../components/BlogCard";
+import CollaborativeRecommendations from "../components/CollaborativeRecommendations";
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
@@ -12,24 +14,20 @@ const Home = () => {
 
   const fetchData = async () => {
     try {
-      const { data: blogData } = await axios.get("http://localhost:8000/api/blog");
+      const API_BASE = import.meta.env.VITE_API_BASE_URL;
+      const { data: latestData } = await axios.get(`${API_BASE}/blog`);
+      const { data: trendingData } = await axios.get(`${API_BASE}/blog/trending`);
 
-      // Sort latest blogs by date (newest first)
-      const latestBlogs = blogData
+      const sortedLatest = latestData
         .slice()
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-      setBlogs(latestBlogs);
+      setBlogs(sortedLatest);
+      setTrendingBlogs(trendingData);
 
-      // Sort trending blogs by likes (most liked first)
-      const trending = blogData
-        .slice()
-        .sort((a, b) => (b.likes?.length || 0) - (a.likes?.length || 0))
-        .slice(0, 6);
-
-      setTrendingBlogs(trending);
-
-      if (user?.id) setCurrentUserId(user.id);
+      if (user?.id) {
+        setCurrentUserId(user.id);
+      }
     } catch (error) {
       console.error("Error loading blogs:", error);
     }
@@ -55,7 +53,6 @@ const Home = () => {
         Welcome{user?.name ? `, ${user.name}` : ""}
       </h1>
 
-      {/* 🟦 LATEST & 🔥 TRENDING */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: "32px" }}>
         {/* 🔵 Latest Blogs */}
         <div style={{ flex: "0 0 70%" }}>
@@ -70,6 +67,7 @@ const Home = () => {
           >
             🔵 Latest Blogs
           </h2>
+
           <div
             style={{
               display: "grid",
@@ -78,11 +76,13 @@ const Home = () => {
             }}
           >
             {visibleBlogs.length === 0 ? (
-              <p style={{ fontStyle: "italic", color: "#666" }}>No blogs available.</p>
+              <p style={{ fontStyle: "italic", color: "#666" }}>
+                No blogs available.
+              </p>
             ) : (
               visibleBlogs.map((blog) => (
                 <BlogCard
-                  key={blog._id || blog.id || blog.title}
+                  key={blog._id}
                   blog={blog}
                   currentUserId={currentUserId}
                 />
@@ -107,6 +107,13 @@ const Home = () => {
               >
                 {showAllBlogs ? "Show Less" : "Read More"}
               </button>
+            </div>
+          )}
+
+          {/* 🧠 Collaborative Recommendations */}
+          {user && (
+            <div style={{ marginTop: "60px" }}>
+              <CollaborativeRecommendations userId={user.id} />
             </div>
           )}
         </div>
@@ -135,14 +142,20 @@ const Home = () => {
               boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
             }}
           >
-            {trendingBlogs.map((blog) => (
-              <BlogCard
-                key={blog._id || blog.id || blog.title}
-                blog={blog}
-                currentUserId={currentUserId}
-                compact={true}
-              />
-            ))}
+            {trendingBlogs.length === 0 ? (
+              <p style={{ fontStyle: "italic", color: "#666" }}>
+                No trending blogs yet.
+              </p>
+            ) : (
+              trendingBlogs.map((blog) => (
+                <BlogCard
+                  key={blog._id}
+                  blog={blog}
+                  currentUserId={currentUserId}
+                  compact={true}
+                />
+              ))
+            )}
           </div>
         </div>
       </div>

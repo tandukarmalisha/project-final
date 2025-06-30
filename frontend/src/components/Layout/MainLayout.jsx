@@ -115,7 +115,7 @@ const MainLayout = () => {
                 <FontAwesomeIcon icon={faPen} /> Add Blog
               </Link>
               <Link to="/recommend">
-                <FontAwesomeIcon icon={faStar} /> Recommendations
+                <FontAwesomeIcon icon={faStar} /> Search Blog
               </Link>
               <Link to="/notifications">
                 <FontAwesomeIcon icon={faBell} /> Notifications
