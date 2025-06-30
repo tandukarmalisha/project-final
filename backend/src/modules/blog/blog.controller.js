@@ -5,11 +5,10 @@ const mongoose = require('mongoose');
 const Blog = require('./blog.model');
 const { exec } = require("child_process");
 const path = require("path");
+const Like = require('../like/like.model'); // Adjust path if needed
+
 
 const scriptPath = path.join(__dirname, "../../recommendation/recommend.py");
-
-
-
 
 // Create Blog
 exports.createBlog = async (req, res) => {
@@ -111,43 +110,6 @@ exports.deleteBlog = async (req, res) => {
   }
 };
 
-// Like / Unlike Blog
-exports.toggleLike = async (req, res) => {
-  try {
-    const blogId = req.params.id;
-    const userId = req.user.id;
-
-    if (!mongoose.Types.ObjectId.isValid(blogId)) {
-      return res.status(400).json({ success: false, message: "Invalid blog ID" });
-    }
-
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      return res.status(404).json({ success: false, message: "Blog not found" });
-    }
-
-    const userIdStr = userId.toString();
-    const likesAsStrings = blog.likes.map(id => id.toString());
-
-    if (likesAsStrings.includes(userIdStr)) {
-      // Unlike
-      blog.likes = blog.likes.filter(id => id.toString() !== userIdStr);
-      await blog.save();
-      return res.status(200).json({ success: true, message: "Unliked", likes: blog.likes });
-    } else {
-      // Like
-      blog.likes.push(userIdStr);
-      await blog.save();
-      return res.status(200).json({ success: true, message: "Liked", likes: blog.likes });
-    }
-  } catch (err) {
-    console.error("Toggle like error:", err);
-    res.status(500).json({ success: false, message: "Server error" });
-  }
-};
-
-
-
 // Add Comment
 exports.addComment = async (req, res) => {
   try {
@@ -214,38 +176,31 @@ exports.getBlogsByUser = async (req, res) => {
   }
 };
 
-// Get User Recommendations - top 7 liked blogs
+
 exports.getUserRecommendations = async (req, res) => {
   try {
-    // Get all blogs with likes count
-    const blogs = await Blog.aggregate([
-      {
-        $addFields: {
-          likeCount: { $size: { "$ifNull": ["$likes", []] } }
-        }
-      },
-      { $sort: { likeCount: -1, createdAt: -1 } },
+    const likeCounts = await Like.aggregate([
+      { $group: { _id: "$blogId", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
       { $limit: 7 }
     ]);
 
-    // Populate author info manually (aggregate returns plain objects)
-    const blogIds = blogs.map(b => b._id);
-    const blogsWithAuthors = await Blog.find({ _id: { $in: blogIds } })
+    const blogIds = likeCounts.map(l => l._id);
+    const blogs = await Blog.find({ _id: { $in: blogIds } })
       .populate("author", "name")
       .lean();
 
-    // Map blogsWithAuthors by _id for quick lookup
-    const authorMap = new Map(blogsWithAuthors.map(blog => [blog._id.toString(), blog.author]));
-
-    // Attach author and likeCount to response blogs
-    const result = blogs.map(blog => ({
-      ...blog,
-      author: authorMap.get(blog._id.toString()) || null,
-    }));
+    const result = blogs.map(blog => {
+      const likeObj = likeCounts.find(l => l._id.toString() === blog._id.toString());
+      return {
+        ...blog,
+        likeCount: likeObj?.count || 0
+      };
+    });
 
     res.status(200).json(result);
   } catch (error) {
-    console.error("GetUserRecommendations error:", error);
+    console.error("User Recommendations error:", error.message);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -253,21 +208,41 @@ exports.getUserRecommendations = async (req, res) => {
 
 exports.getTrendingBlogs = async (req, res) => {
   try {
-    const topBlogs = await Blog.find()
-      .lean()
-      .populate("author", "name") // include author name
-      .sort({ createdAt: -1 }); // fallback sort
+    const trendingBlogs = await Blog.aggregate([
+      {
+        $lookup: {
+          from: "likes", // collection name in MongoDB (usually plural lowercase)
+          localField: "_id",
+          foreignField: "blogId",
+          as: "likesData",
+        },
+      },
+      {
+        $addFields: {
+          likeCount: { $size: "$likesData" },
+        },
+      },
+      {
+        $sort: { likeCount: -1, createdAt: -1 },
+      },
+      { $limit: 7 },
+      {
+        $project: {
+          title: 1,
+          content: 1,
+          image: 1,
+          categories: 1,
+          author: 1,
+          likeCount: 1,
+          createdAt: 1,
+        },
+      },
+    ]).exec();
 
-    // manually sort by like count
-    const sorted = topBlogs
-      .map(blog => ({
-        ...blog,
-        likeCount: blog.likes.length || 0,
-      }))
-      .sort((a, b) => b.likeCount - a.likeCount)
-      .slice(0, 7); // top 7 only
+    // Populate author name (if needed)
+    await Blog.populate(trendingBlogs, { path: "author", select: "name" });
 
-    res.status(200).json(sorted);
+    res.status(200).json(trendingBlogs);
   } catch (error) {
     console.error("Trending blog error:", error.message);
     res.status(500).json({ message: "Internal server error" });
@@ -307,32 +282,6 @@ exports.getAllBlogsForRecommendation = async (req, res) => {
 };
 
 
-// exports.getContentRecommendations = (req, res) => {
-//   const userQuery = req.params.title.trim();
-//   const scriptPath = path.join(__dirname, "../recommendation/recommend.py");
-//   const command = `python "${scriptPath}" "${userQuery}"`;
-
-//   exec(command, (error, stdout, stderr) => {
-//     if (error) {
-//       console.error("Python Error:", error.message);
-//       return res.status(500).json({ message: "Recommendation failed" });
-//     }
-
-//     if (stderr) {
-//       console.warn("Python stderr:", stderr);
-//     }
-
-//     try {
-//       // ✅ Directly parse the Python JSON output
-//       const output = JSON.parse(stdout);
-//       return res.status(200).json(output); // Already in format: { recommendations: [...] }
-//     } catch (e) {
-//       console.error("JSON Parse Error:", e.message);
-//       return res.status(500).json({ message: "Invalid recommendation format" });
-//     }
-//   });
-// };
-
 exports.getContentRecommendations = (req, res) => {
   const userQuery = decodeURIComponent(req.params.title).trim(); // ✅ Fix added
   const scriptPath = path.join(__dirname, "../recommendation/recommend.py");
@@ -357,3 +306,90 @@ exports.getContentRecommendations = (req, res) => {
     }
   });
 };
+
+// blog.controller.js
+exports.getRelatedBlogs = async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.blogId);
+    if (!blog) return res.status(404).json({ message: "Blog not found" });
+
+    const category = blog.categories?.[0];
+    const relatedBlogs = await Blog.find({
+      categories: category,
+      _id: { $ne: blog._id }
+    }).limit(3);
+
+    res.status(200).json({ relatedBlogs });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// blog.controller.js
+exports.getCollaborativeRecommendations = (req, res) => {
+  const userId = req.user.id; // must be from verifyToken middleware
+  const scriptPath = path.join(__dirname, "../recommendation/recommend_collab.py");
+  const command = `python "${scriptPath}" "${userId}"`;
+
+  console.log("Running collaborative recommend command:", command);
+
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error("Python Error:", error);
+      return res.status(500).json({ message: "Recommendation failed", error: error.message });
+    }
+
+    if (stderr) {
+      console.warn("Python stderr:", stderr);
+    }
+
+    try {
+      const output = JSON.parse(stdout);
+      // Expected output format: { recommendations: [blogId1, blogId2, ...] }
+      return res.status(200).json(output);
+    } catch (e) {
+      console.error("JSON Parse Error:", e.message);
+      return res.status(500).json({ message: "Invalid recommendation format" });
+    }
+  });
+};
+
+exports.getMetadataByIds = async (req, res) => {
+  const ids = req.query.ids?.split(",");
+  if (!ids || ids.length === 0) return res.status(400).json({ message: "No blog IDs provided" });
+
+  try {
+    const blogs = await Blog.find({ _id: { $in: ids } }).populate("author", "name");
+    res.status(200).json(blogs);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch blogs" });
+  }
+};
+
+
+exports.getUserCollaborativeRecommendations = (req, res) => {
+  const userId = req.params.userId;  // <-- userId not blogId
+  const scriptPath = path.join(__dirname, "../recommendation/recommend_collab.py");
+
+  const command = `python "${scriptPath}" "${userId}"`;
+
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error("Python Error:", error);
+      return res.status(500).json({ message: "Recommendation failed", error: error.message });
+    }
+
+    try {
+      const output = JSON.parse(stdout);
+      return res.status(200).json(output);
+    } catch (e) {
+      console.error("JSON Parse Error:", e.message);
+      return res.status(500).json({ message: "Invalid recommendation format" });
+    }
+  });
+};
+
+
+
+

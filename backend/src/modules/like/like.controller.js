@@ -1,39 +1,61 @@
-const mongoose = require("mongoose");
-const Blog = require("../blog/blog.model");
+// like.controller.js
 
-// Toggle Like / Unlike
-exports.toggleLike = async (req, res) => {
+import Like from './like.model.js';
+
+// Get all likes
+export const getAllLikes = async (req, res) => {
+  try {
+    const likes = await Like.find();
+    res.status(200).json(likes);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch likes" });
+  }
+};
+
+// Toggle Like
+export const toggleLike = async (req, res) => {
   try {
     const blogId = req.params.id;
     const userId = req.user.id;
 
-    if (!mongoose.Types.ObjectId.isValid(blogId)) {
-      return res.status(400).json({ success: false, message: "Invalid blog ID" });
-    }
+    const existing = await Like.findOne({ blogId, userId });
 
-    const blog = await Blog.findById(blogId);
-    if (!blog) {
-      return res.status(404).json({ success: false, message: "Blog not found" });
-    }
-
-    const userIdStr = userId.toString();
-    const alreadyLiked = blog.likes.some((id) => id.toString() === userIdStr);
-
-    if (alreadyLiked) {
-      blog.likes = blog.likes.filter((id) => id.toString() !== userIdStr);
+    if (existing) {
+      await existing.deleteOne();
     } else {
-      blog.likes.push(userIdStr);
+      await Like.create({ blogId, userId });
     }
 
-    await blog.save();
+    const totalLikes = await Like.countDocuments({ blogId });
+    const liked = !existing;
 
     return res.status(200).json({
       success: true,
-      message: alreadyLiked ? "Unliked" : "Liked",
-      likes: blog.likes,
+      message: liked ? "Liked" : "Unliked",
+      liked,
+      totalLikes,
     });
   } catch (err) {
     console.error("Toggle like error:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+export const getLikeStatus = async (req, res) => {
+  const userId = req.user.id; // or req.user._id if using mongoose
+  const blogId = req.params.blogId;
+
+  try {
+    const like = await Like.findOne({ blogId: blogId, userId: userId });
+    const totalLikes = await Like.countDocuments({ blogId: blogId });
+
+    res.status(200).json({
+      liked: !!like,
+      totalLikes,
+    });
+  } catch (error) {
+    console.error("Error getting like status:", error);
+    res.status(500).json({ message: "Error checking like status" });
+  }
+};
+

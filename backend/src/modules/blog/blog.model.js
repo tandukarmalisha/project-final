@@ -15,7 +15,7 @@ const blogSchema = new mongoose.Schema({
   content: { type: String, required: true },
   categories: [{ type: String }],
   author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  // likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   comments: [commentSchema],  // Embed comments as subdocuments
 }, {
