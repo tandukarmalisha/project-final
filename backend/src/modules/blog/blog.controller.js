@@ -86,6 +86,7 @@ exports.updateBlog = async (req, res) => {
 };
 
 // Delete Blog (only author)
+
 exports.deleteBlog = async (req, res) => {
   try {
     const blogId = req.params.id;
@@ -96,17 +97,20 @@ exports.deleteBlog = async (req, res) => {
     }
 
     const blog = await Blog.findById(blogId);
-    if (!blog) return res.status(404).json({ message: "Blog not found" });
+    if (!blog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
 
     if (blog.author.toString() !== userId) {
       return res.status(403).json({ message: "Not authorized to delete this blog" });
     }
 
-    await blog.remove();
-    res.json({ message: "Blog deleted successfully" });
+    await Blog.findByIdAndDelete(blogId); // ✅ recommended method
+
+    return res.json({ message: "Blog deleted successfully" });
   } catch (error) {
     console.error("Delete blog error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 
