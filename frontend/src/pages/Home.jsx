@@ -101,7 +101,7 @@ const Home = () => {
                   borderRadius: 6,
                   cursor: "pointer",
                   fontWeight: "bold",
-                  background: "#4f46e5",
+                  background: "black",
                   color: "#fff",
                 }}
               >
@@ -135,9 +135,9 @@ const Home = () => {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "16px",
-              background: "#fff0f0",
-              padding: "12px",
+              gap: "20px",
+              background: "black",
+              padding: "20px",
               borderRadius: "10px",
               boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
             }}
@@ -147,7 +147,7 @@ const Home = () => {
                 No trending blogs yet.
               </p>
             ) : (
-              trendingBlogs.map((blog) => (
+              trendingBlogs.slice(0,4).map((blog) => (
                 <BlogCard
                   key={blog._id}
                   blog={blog}

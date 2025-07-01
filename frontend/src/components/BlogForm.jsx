@@ -249,6 +249,7 @@ const BlogForm = () => {
             accept="image/*"
             onChange={handleChange}
             style={styles.input}
+            required
           />
 
           <button

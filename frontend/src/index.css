@@ -10,10 +10,10 @@ body {
 }
 
 .form-container {
-  max-width: 400px;
+  max-width: 450px;
   margin: 4rem auto;
-  padding: 2rem;
-  background-color: #ffffff;
+  padding: 4rem;
+  background-color: white;
   border: 1px solid #ddd;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
