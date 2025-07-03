@@ -64,7 +64,8 @@ return (
             borderRadius: "0.375rem",
             border: "none",
             cursor: loading ? "not-allowed" : "pointer",
-            fontWeight: "bold"
+            fontWeight: "bold",
+            width:"200px"
           }}
         >
           {loading ? "Searching..." : "Recommend"}

@@ -1,8 +1,8 @@
-// pages/Home.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import BlogCard from "../components/BlogCard";
 import CollaborativeRecommendations from "../components/CollaborativeRecommendations";
+import CategoryRecommendations from "../components/CategoryRecommendations";
 
 const Home = () => {
   const [blogs, setBlogs] = useState([]);
@@ -110,12 +110,7 @@ const Home = () => {
             </div>
           )}
 
-          {/* 🧠 Collaborative Recommendations */}
-          {user && (
-            <div style={{ marginTop: "60px" }}>
-              <CollaborativeRecommendations userId={user.id} />
-            </div>
-          )}
+         
         </div>
 
         {/* 🔥 Trending Blogs */}
@@ -147,7 +142,7 @@ const Home = () => {
                 No trending blogs yet.
               </p>
             ) : (
-              trendingBlogs.slice(0,4).map((blog) => (
+              trendingBlogs.slice(0, 4).map((blog) => (
                 <BlogCard
                   key={blog._id}
                   blog={blog}
@@ -159,6 +154,21 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+       {/* 🧩 Category-Based Recommendations
+          {user && (
+            <div style={{ marginTop: "60px" }}>
+              <CategoryRecommendations currentUserId={user.id} />
+            </div>
+          )} */}
+
+      {/* 🧠 Collaborative Recommendations (below trending) */}
+      {user && (
+        <div style={{ marginTop: "60px" }}>
+          <CategoryRecommendations currentUserId={user.id} />
+          <CollaborativeRecommendations userId={user.id} />
+        </div>
+      )}
     </div>
   );
 };
