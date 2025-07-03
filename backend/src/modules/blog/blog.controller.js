@@ -312,6 +312,8 @@ exports.getContentRecommendations = (req, res) => {
 };
 
 // blog.controller.js
+
+
 exports.getRelatedBlogs = async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.blogId);
@@ -393,6 +395,77 @@ exports.getUserCollaborativeRecommendations = (req, res) => {
     }
   });
 };
+
+
+// 🚀 CATEGORY-BASED RECOMMENDATION
+exports.recommendByCategoryPublic = async (req, res) => {
+  try {
+    const userId = req.query.userId;
+
+    if (!userId) {
+      return res.status(400).json({ message: "Missing userId in query" });
+    }
+
+    // Find blogs the user liked
+    const likedBlogs = await Like.find({ userId }).populate("blogId");
+
+    const categories = [
+      ...new Set(
+        likedBlogs
+          .map((like) => like.blogId?.categories)
+          .flat()
+          .filter(Boolean)
+      ),
+    ];
+
+    if (!categories.length) {
+      return res.json({ recommendations: [] });
+    }
+
+    const likedBlogIds = likedBlogs.map((like) => like.blogId?._id?.toString());
+
+    // Find other blogs in same categories, excluding already liked
+    const blogs = await Blog.find({
+      categories: { $in: categories },
+      _id: { $nin: likedBlogIds },
+    }).populate("author", "name");
+
+    const blogIds = blogs.map((blog) => blog._id);
+
+    // Get real like counts from Like collection
+    const likeCounts = await Like.aggregate([
+      { $match: { blogId: { $in: blogIds } } },
+      { $group: { _id: "$blogId", count: { $sum: 1 } } },
+    ]);
+
+    const likeMap = {};
+    likeCounts.forEach((l) => (likeMap[l._id.toString()] = l.count));
+
+    const enrichedBlogs = blogs.map((blog) => ({
+      ...blog.toObject(),
+      likeCount: likeMap[blog._id.toString()] || 0,
+    }));
+
+    // ✅ Sort: by likeCount desc → commentCount desc → recent
+    enrichedBlogs.sort((a, b) => {
+      const likeDiff = b.likeCount - a.likeCount;
+      if (likeDiff !== 0) return likeDiff;
+
+      const commentDiff = (b.comments?.length || 0) - (a.comments?.length || 0);
+      if (commentDiff !== 0) return commentDiff;
+
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    res.json({ recommendations: enrichedBlogs });
+  } catch (err) {
+    console.error("Category recommendation error:", err);
+    res.status(500).json({ message: "Failed to fetch recommendations" });
+  }
+};
+
+
+
 
 
 

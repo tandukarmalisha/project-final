@@ -34,6 +34,7 @@ router.get('/category/:category', blogController.getBlogsByCategory);
 // 🔥 FIX: move this line ABOVE `/:id`
 router.get('/recommendation-data', blogController.getAllBlogsForRecommendation);
 router.get('/recommend-content/:title', blogController.getContentRecommendations);
+router.get("/recommend-category-public", blogController.recommendByCategoryPublic);
 router.get("/recommend-collab", verifyToken, blogController.getCollaborativeRecommendations);
 router.get("/recommend-user/:userId", blogController.getUserCollaborativeRecommendations);
 
