@@ -131,170 +131,169 @@ const Home = () => {
       <div style={{ display: "flex", flexWrap: "wrap", gap: "32px" }}>
         {/* Latest Blogs Section */}
         <div style={{ flex: 1, minWidth: "300px" }}>
-  <h2
-    style={{
-      fontWeight: "600",
-      marginBottom: 16,
-      borderBottom: "2px solid #4f46e5",
-      paddingBottom: 6,
-      color: "#4f46e5",
-    }}
-  >
-    🔵 Latest Blogs
-  </h2>
+          <h2
+            style={{
+              fontWeight: "600",
+              marginBottom: 16,
+              borderBottom: "2px solid #4f46e5",
+              paddingBottom: 6,
+              color: "#4f46e5",
+            }}
+          >
+            🔵 Latest Blogs
+          </h2>
 
-  <div
-    style={{
-      display: "grid",
-      gridTemplateColumns: "1fr", // <-- make each blog full width
-      gap: "20px",
-    }}
-  >
-    {initialBlogs.length === 0 ? (
-      <p style={{ fontStyle: "italic", color: "#666" }}>No blogs available.</p>
-    ) : (
-      initialBlogs.map((blog, idx) => (
-        <React.Fragment key={blog._id}>
-          {idx === firstOtherIndex && (
-            <p
-              style={{
-                width: "100%",
-                textAlign: "center",
-                fontSize: "18px",
-                color: "#666",
-                margin: "10px 0 0 0",
-              }}
-            >
-              Discover more blogs
-            </p>
-          )}
-          <BlogCard blog={blog} currentUserId={currentUserId} />
-        </React.Fragment>
-      ))
-    )}
-  </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr", // <-- make each blog full width
+              gap: "20px",
+            }}
+          >
+            {initialBlogs.length === 0 ? (
+              <p style={{ fontStyle: "italic", color: "#666" }}>No blogs available.</p>
+            ) : (
+              initialBlogs.map((blog, idx) => (
+                <React.Fragment key={blog._id}>
+                  {idx === firstOtherIndex && (
+                    <p
+                      style={{
+                        width: "100%",
+                        textAlign: "center",
+                        fontSize: "18px",
+                        color: "#666",
+                        margin: "10px 0 0 0",
+                      }}
+                    >
+                      Discover more blogs
+                    </p>
+                  )}
+                  <BlogCard blog={blog} currentUserId={currentUserId} />
+                </React.Fragment>
+              ))
+            )}
+          </div>
 
   {/* Read More Button */}
-  {extraBlogs.length > 0 && !showAllBlogs && (
-    <div style={{ textAlign: "center", marginTop: "24px" }} ref={readMoreBtnRef}>
-      <button
-        onClick={handleReadMore}
-        style={{
-          width: "200px",
-          padding: "10px 20px",
-          border: "none",
-          borderRadius: 6,
-          cursor: "pointer",
-          fontWeight: "bold",
-          background: "black",
-          color: "#fff",
-        }}
-      >
-        Read More
-      </button>
-    </div>
-  )}
-</div>
+          {extraBlogs.length > 0 && !showAllBlogs && (
+            <div style={{ textAlign: "center", marginTop: "24px" }} ref={readMoreBtnRef}>
+              <button
+                onClick={handleReadMore}
+                style={{
+                  width: "200px",
+                  padding: "10px 20px",
+                  border: "none",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  background: "black",
+                  color: "#fff",
+                }}
+              >
+                Read More
+              </button>
+            </div>
+          )}
+        </div>
 
 
         {/* Trending Section */}
-<div style={{ flex: "0 0 350px", maxWidth: "100%" }}>
-  <h2
-    style={{
-      fontWeight: "600",
-      marginBottom: 16,
-      borderBottom: "2px solid #ef4444",
-      paddingBottom: 6,
-      color: "#ef4444",
-    }}
-  >
-    🔥 Top Trending
-  </h2>
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      gap: "20px",
-      background: "black",
-      padding: "20px",
-      borderRadius: "10px",
-      boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-    }}
-  >
-    {trendingFollowed.length === 0 && trendingOthers.length === 0 ? (
-      <p style={{ fontStyle: "italic", color: "#666" }}>No trending blogs yet.</p>
-    ) : (
-      <>
-        {/* If user has followings, show 2 + 3 */}
-        {trendingFollowed.length > 0 && (
-          <div>
-            <h3
-              style={{
-                color: "#fff",
-                margin: 0,
-                marginBottom: 8,
-                fontSize: 16,
-                fontWeight: 700,
-              }}
-            >
-              🔥 Trending from People You Follow
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {trendingFollowed.slice(0, 2).map((blog) => (
-                <BlogCard
-                  key={blog._id}
-                  blog={blog}
-                  currentUserId={currentUserId}
-                  compact={true}
-                />
-              ))}
-            </div>
+        <div style={{ flex: "0 0 350px", maxWidth: "100%" }}>
+          <h2
+            style={{
+              fontWeight: "600",
+              marginBottom: 16,
+              borderBottom: "2px solid #ef4444",
+              paddingBottom: 6,
+              color: "#ef4444",
+            }}
+          >
+            🔥 Top Trending
+          </h2>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+              background: "black",
+              padding: "20px",
+              borderRadius: "10px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            }}
+          >
+            {trendingFollowed.length === 0 && trendingOthers.length === 0 ? (
+              <p style={{ fontStyle: "italic", color: "#666" }}>No trending blogs yet.</p>
+            ) : (
+              <>
+                {/* If user has followings, show 2 + 3 */}
+                {trendingFollowed.length > 0 && (
+                  <div>
+                    <h3
+                      style={{
+                        color: "#fff",
+                        margin: 0,
+                        marginBottom: 8,
+                        fontSize: 16,
+                        fontWeight: 700,
+                      }}
+                    >
+                      🔥 Trending from People You Follow
+                    </h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      {trendingFollowed.slice(0, 2).map((blog) => (
+                        <BlogCard
+                          key={blog._id}
+                          blog={blog}
+                          currentUserId={currentUserId}
+                          compact={true}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {trendingFollowed.length > 0 && trendingOthers.length > 0 && (
+                  <hr style={{ borderColor: "rgba(255,255,255,0.08)" }} />
+                )}
+
+                {trendingOthers.length > 0 && (
+                  <div>
+                    <h3
+                      style={{
+                        color: "#fff",
+                        margin: 0,
+                        marginBottom: 8,
+                        fontSize: 16,
+                        fontWeight: 700,
+                      }}
+                    >
+                      🔥 Recommended Trending
+                    </h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                      {trendingFollowed.length > 0
+                        ? trendingOthers.slice(0, 3).map((blog) => (
+                            <BlogCard
+                              key={blog._id}
+                              blog={blog}
+                              currentUserId={currentUserId}
+                              compact={true}
+                            />
+                          ))
+                        : trendingOthers.slice(0, 5).map((blog) => (
+                            <BlogCard
+                              key={blog._id}
+                              blog={blog}
+                              currentUserId={currentUserId}
+                              compact={true}
+                            />
+                          ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        )}
-
-        {trendingFollowed.length > 0 && trendingOthers.length > 0 && (
-          <hr style={{ borderColor: "rgba(255,255,255,0.08)" }} />
-        )}
-
-        {trendingOthers.length > 0 && (
-          <div>
-            <h3
-              style={{
-                color: "#fff",
-                margin: 0,
-                marginBottom: 8,
-                fontSize: 16,
-                fontWeight: 700,
-              }}
-            >
-              🔥 Recommended Trending
-            </h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {trendingFollowed.length > 0
-                ? trendingOthers.slice(0, 3).map((blog) => (
-                    <BlogCard
-                      key={blog._id}
-                      blog={blog}
-                      currentUserId={currentUserId}
-                      compact={true}
-                    />
-                  ))
-                : trendingOthers.slice(0, 5).map((blog) => (
-                    <BlogCard
-                      key={blog._id}
-                      blog={blog}
-                      currentUserId={currentUserId}
-                      compact={true}
-                    />
-                  ))}
-            </div>
-          </div>
-        )}
-      </>
-    )}
-  </div>
-</div>
-
+        </div>
       </div>
 
       {/* Recommendations Section */}

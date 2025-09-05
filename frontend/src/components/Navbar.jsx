@@ -2,46 +2,17 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NotificationsDropdown from "./NotificationDropdown";
 import SearchUser from "./SearchUser";
-// import BlogSearchBox from "./BlogSearchBox"; // <-- Import here
-
-
-
-const categories = [
-  "Technology", "Programming", "Lifestyle", "Entertainment", "Music",
-  "Movies", "Sports", "Travel", "Food", "Nature", "Health",
-  "Education", "Bollywood", "Fashion", "Personal", "News"
-];
 
 const Navbar = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const isLoggedIn = !!localStorage.getItem("token");
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredCategories, setFilteredCategories] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(0);
-
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/");
     window.location.reload();
-  };
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    const filtered = categories.filter((cat) =>
-      cat.toLowerCase().startsWith(value.toLowerCase())
-    );
-    setFilteredCategories(value ? filtered : []);
-    setActiveIndex(0);
-  };
-
-  const handleCategorySelect = (category) => {
-    setSearchTerm("");
-    setFilteredCategories([]);
-    navigate(`/category/${category.toLowerCase()}`);
   };
 
   const navStyle = {
@@ -52,17 +23,20 @@ const Navbar = () => {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "0.8rem 2rem",
-    backgroundColor: "#111827",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+    backgroundColor: "#ffffff",
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
     fontFamily: "Segoe UI, sans-serif",
   };
 
   const brandStyle = {
-    fontSize: "2.2rem",
-    fontWeight: "800",
-    color: "#facc15",
+    fontSize: "2rem",
+    fontWeight: "700",
+    color: "#4f46e5",
     textDecoration: "none",
     letterSpacing: "1px",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
   };
 
   const linkContainerStyle = {
@@ -71,106 +45,80 @@ const Navbar = () => {
     gap: "1rem",
   };
 
-  const linkStyle = {
-    fontSize: "1rem",
-    textDecoration: "none",
-    color: "#f3f4f6",
-    fontWeight: 500,
-    transition: "color 0.3s ease",
+  const profileStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
     cursor: "pointer",
+    padding: "0.2rem 0.6rem",
+    borderRadius: "9999px",
+    transition: "background 0.2s",
+  };
+
+  const avatarStyle = {
+    backgroundColor: "#4f46e5",
+    color: "#fff",
+    borderRadius: "50%",
+    width: "36px",
+    height: "36px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: "bold",
+    fontSize: "1rem",
+    textTransform: "uppercase",
   };
 
   return (
     <nav style={navStyle}>
-      <div style={{ display: 'flex' }}>
-    <Link to="/" style={{ textDecoration: 'none' }}>
-      <img 
-        src="/favicon.ico" 
-        alt="IdeaFlux Logo" 
-        style={{ width: '60px', height: '60px', marginRight: '10px' }} 
-      />
-    </Link>
+      {/* Brand */}
       <Link to="/" style={brandStyle}>
+        <img src="/favicon.ico" alt="Logo" style={{ width: "40px", height: "40px" }} />
         IdeaFlux
       </Link>
-      </div>
-      
-      
 
+      {/* Center: Search */}
+      {isLoggedIn && <SearchUser />}
 
+      {/* Right Links / Profile */}
       <div style={linkContainerStyle}>
-        {!isLoggedIn ? (
+        {isLoggedIn ? (
           <>
-            {/* <Link to="/login" style={linkStyle}>Login</Link>
-            <Link to="/register" style={linkStyle}>Register</Link> */}
-          </>
-        ) : (
-          <>
-            {/* <Link to="/add-blog" style={linkStyle}>Add Blog</Link> */}
-
-            {/* <Link to="/recommend" style={linkStyle}>Recommendation</Link> ✅ Added */}
-
-
-            {/* <SearchUser /> */}
-
-            {/* <NotificationsDropdown /> */}
-
-            {/* Profile section */}
+            <NotificationsDropdown />
             <div
               onClick={() => navigate("/profile")}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                cursor: "pointer",
-                padding: "0.2rem 0.6rem",
-                borderRadius: "9999px",
-              }}
+              style={profileStyle}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f3f4f6")}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              title={`Logged in as ${user?.name}`}
             >
-              <div
-                style={{
-                  backgroundColor: "#facc15",
-                  color: "#1f2937",
-                  borderRadius: "50%",
-                  width: "36px",
-                  height: "36px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "bold",
-                  fontSize: "1rem",
-                  textTransform: "uppercase",
-                }}
-                title={`Logged in as ${user?.name}`}
-              >
-                {user?.name?.charAt(0) || "U"}
-              </div>
-              <span
-                style={{
-                  fontWeight: "600",
-                  fontSize: "1.1rem",
-                  color: "#facc15",
-                }}
-              >
+              <div style={avatarStyle}>{user?.name?.charAt(0) || "U"}</div>
+              <span style={{ fontWeight: "600", fontSize: "1rem", color: "#4f46e5" }}>
                 {user?.name}
               </span>
             </div>
-
-            {/* Logout */}
-            {/* <button
+            <button
               onClick={handleLogout}
               style={{
-                ...linkStyle,
-                background: "none",
-                border: "none",
+                background: "#d50707ff",
+                border:"none",
                 fontWeight: 500,
-                fontSize: "1.1rem",
+                fontSize: "1rem",
+                color: "white",
+                cursor: "pointer",
+                transition: "color 0.2s",
+                borderRadius:"50px",
               }}
-              onMouseOver={(e) => (e.target.style.color = "#f87171")}
-              onMouseOut={(e) => (e.target.style.color = "#f3f4f6")}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#f25757ff")}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = "#d50707ff")}
             >
               Logout
-            </button> */}
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" style={{ color: "#4f46e5", fontWeight: 500, textDecoration: "none" }}>Login</Link>
+            <Link to="/register" style={{ color: "#4f46e5", fontWeight: 500, textDecoration: "none" }}>Register</Link>
           </>
         )}
       </div>
