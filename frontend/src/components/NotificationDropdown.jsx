@@ -1,229 +1,220 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import { FaBell } from "react-icons/fa";
-
-// const NotificationDropdown = () => {
-//   const [notifications, setNotifications] = useState([]);
-//   const [open, setOpen] = useState(false);
-//   const currentUser = JSON.parse(localStorage.getItem("user"));
-//   const token = localStorage.getItem("token");
-
-//   // Fetch notifications
-//   const fetchNotifications = async () => {
-//     try {
-//       const res = await axios.get(`http://localhost:8000/api/notification/${currentUser.id}`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setNotifications(res.data.notifications || []);
-//     } catch (err) {
-//       console.error("Error fetching notifications", err);
-//     }
-//   };
-
-//   // Mark notifications as read
-//   const markNotificationsRead = async () => {
-//     try {
-//       await axios.post(
-//         `http://localhost:8000/api/notification/mark-read/${currentUser.id}`,
-//         {},
-//         { headers: { Authorization: `Bearer ${token}` } }
-//       );
-//       // Update local state to mark all as read
-//       setNotifications((prev) =>
-//         prev.map((n) => ({ ...n, read: true }))
-//       );
-//     } catch (err) {
-//       console.error("Error marking notifications as read", err);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (token && currentUser?.id) {
-//       fetchNotifications();
-//     }
-//   }, []);
-
-//   const unreadCount = notifications.filter((n) => !n.read).length;
-
-//   const toggleOpen = () => {
-//     setOpen(!open);
-//     if (!open && unreadCount > 0) {
-//       // If opening and there are unread notifications, mark them read
-//       markNotificationsRead();
-//     }
-//   };
-
-//   return (
-//     <div style={{ position: "relative" }}>
-//       <FaBell
-//         size={22}
-//         onClick={toggleOpen}
-//         style={{ cursor: "pointer", color: "#facc15" }}
-//       />
-
-//       {/* Show badge only if unread notifications */}
-//       {unreadCount > 0 && (
-//         <span
-//           style={{
-//             position: "absolute",
-//             top: -4,
-//             right: -4,
-//             backgroundColor: "red",
-//             color: "white",
-//             borderRadius: "50%",
-//             padding: "2px 6px",
-//             fontSize: "12px",
-//             fontWeight: "bold",
-//             minWidth: "18px",
-//             textAlign: "center",
-//             lineHeight: 1,
-//             pointerEvents: "none",
-//           }}
-//         >
-//           {unreadCount}
-//         </span>
-//       )}
-
-//       {open && (
-//         <div
-//           style={{
-//             position: "absolute",
-//             top: "30px",
-//             right: 0,
-//             width: "250px",
-//             backgroundColor: "#fff",
-//             boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
-//             borderRadius: "8px",
-//             zIndex: 100,
-//             padding: "10px",
-//           }}
-//         >
-//           <h4 style={{ fontSize: "16px", marginBottom: 8, color: "black" }}>
-//             Notifications
-//           </h4>
-//           {notifications.length === 0 ? (
-//             <p style={{ fontSize: "14px", color: "#666" }}>No new notifications</p>
-//           ) : (
-//             notifications.map((n) => (
-//               <div key={n._id} style={{ fontSize: "14px", marginBottom: 6, color: "black" }}>
-//                 <strong>{n.sender?.name}</strong>{" "}
-//                 {n.type === "follow" ? "followed you" : n.message}
-//                 <br />
-//                 <small style={{ color: "#888" }}>{new Date(n.createdAt).toLocaleString()}</small>
-//               </div>
-//             ))
-//           )}
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default NotificationDropdown;
-
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaBell } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";  // Import useNavigate
+import { useNavigate } from "react-router-dom";
+import { socket } from "../utils/socket"; // your socket.js file
 
 const NotificationDropdown = () => {
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState(null); // For real-time popup
   const currentUser = JSON.parse(localStorage.getItem("user"));
   const token = localStorage.getItem("token");
-  const navigate = useNavigate();  // Initialize navigate
+  const navigate = useNavigate();
+
+  // count only unread follow notifications
+  const unreadCount = notifications.filter(
+    (n) => n.type === "follow" && !n.read
+  ).length;
 
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(`http://localhost:8000/api/notification/${currentUser.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setNotifications(res.data.notifications || []);
+      const res = await axios.get(
+        `http://localhost:8000/api/notification/${currentUser.id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // only follow notifications & reset isNew flag
+      const normalized = (res.data.notifications || [])
+        .filter((n) => n.type === "follow")
+        .map((n) => ({ ...n, isNew: false }));
+      setNotifications(normalized);
     } catch (err) {
       console.error("Error fetching notifications", err);
     }
   };
 
   useEffect(() => {
-    if (token && currentUser?.id) {
-      fetchNotifications();
-    }
+    if (token && currentUser?.id) fetchNotifications();
+
+    // Join socket room
+    socket.emit("joinRoom", currentUser?.id);
+
+    // Listen for new follow notifications
+    socket.on("newNotification", (notification) => {
+      if (notification.type === "follow") {
+        setNotifications((prev) => [
+          { ...notification, isNew: true },
+          ...prev,
+        ]);
+        setToast(notification); // show popup
+        setTimeout(() => setToast(null), 4000);
+      }
+    });
+
+    return () => socket.off("newNotification");
   }, []);
 
-  // Function to handle clicking sender's name
+  const handleBellClick = async () => {
+    setOpen(!open);
+
+    if (!open) {
+      // Clear NEW flags when dropdown is opened
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, isNew: false }))
+      );
+    }
+
+    // Mark all as read in DB
+    if (unreadCount > 0) {
+      try {
+        await axios.post(
+          `http://localhost:8000/api/notification/mark-read/${currentUser.id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setNotifications((prev) =>
+          prev.map((n) => ({ ...n, read: true }))
+        );
+      } catch (err) {
+        console.error("Error marking notifications as read", err);
+      }
+    }
+  };
+
   const goToSenderProfile = (senderId) => {
-    navigate(`/user/${senderId}`);  // Changed here to /user/:userId
-    setOpen(false); // Optional: close the dropdown on click
+    navigate(`/user/${senderId}`);
+    setOpen(false);
   };
 
   return (
     <div style={{ position: "relative" }}>
-      <FaBell
-        size={22}
-        onClick={() => setOpen(!open)}
-        style={{ cursor: "pointer", color: "#facc15" }}
-      />
+      {/* Bell Icon */}
+      <div
+        onClick={handleBellClick}
+        style={{ position: "relative", cursor: "pointer" }}
+      >
+        <FaBell size={28} style={{ color: "#facc15" }} />
+        {unreadCount > 0 && (
+          <span
+            style={{
+              position: "absolute",
+              top: -5,
+              right: -5,
+              backgroundColor: "red",
+              color: "white",
+              borderRadius: "50%",
+              padding: "3px 7px",
+              fontSize: "12px",
+              fontWeight: "bold",
+            }}
+          >
+            {unreadCount}
+          </span>
+        )}
+      </div>
 
-      {/* Notification count badge */}
-      {notifications.length > 0 && (
-        <span
-          style={{
-            position: "absolute",
-            top: -4,
-            right: -4,
-            backgroundColor: "red",
-            color: "white",
-            borderRadius: "50%",
-            padding: "2px 6px",
-            fontSize: "12px",
-            fontWeight: "bold",
-            minWidth: "18px",
-            textAlign: "center",
-            lineHeight: 1,
-            pointerEvents: "none",
-          }}
-        >
-          {notifications.length}
-        </span>
-      )}
-
+      {/* Dropdown */}
       {open && (
         <div
           style={{
             position: "absolute",
-            top: "30px",
+            top: "35px",
             right: 0,
-            width: "280px",
+            width: "300px",
             backgroundColor: "#fff",
-            boxShadow: "0px 4px 8px rgba(0,0,0,0.1)",
-            borderRadius: "8px",
+            boxShadow: "0px 4px 12px rgba(0,0,0,0.15)",
+            borderRadius: "12px",
             zIndex: 100,
-            padding: "10px",
+            padding: "10px 0",
+            maxHeight: "400px",
+            overflowY: "auto",
           }}
         >
-          <h4 style={{ fontSize: "16px", marginBottom: 8, color: "black" }}>
-            Notifications
+          <h4
+            style={{
+              fontSize: "16px",
+              fontWeight: "600",
+              padding: "0 15px",
+              marginBottom: 10,
+            }}
+          >
+            Follow Notifications
           </h4>
+
           {notifications.length === 0 ? (
-            <p style={{ fontSize: "14px", color: "#666" }}>No new notifications</p>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "#888",
+                padding: "0 15px",
+              }}
+            >
+              No new followers
+            </p>
           ) : (
-            notifications.map((n) => (
-              <div
-                key={n._id}
-                style={{ fontSize: "14px", marginBottom: 6, color: "black" }}
-              >
-                <strong
+            notifications
+              .slice(0, 5) // show only latest 5
+              .map((n) => (
+                <div
+                  key={n._id}
                   onClick={() => goToSenderProfile(n.sender._id)}
-                  style={{ cursor: "pointer", color: "#2563eb", textDecoration: "underline" }}
-                  title={`Go to ${n.sender?.name}'s profile`}
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: "10px 15px",
+                    margin: "0 10px 5px 10px",
+                    borderRadius: "10px",
+                    backgroundColor: n.read ? "#f3f4f6" : "#e0f2fe",
+                    cursor: "pointer",
+                    transition: "background 0.2s",
+                  }}
                 >
-                  {n.sender?.name}
-                </strong>{" "}
-                {n.type === "follow" ? "followed you" : n.message}
-              </div>
-            ))
+                  <span>
+                    <strong style={{ color: "#2563eb" }}>
+                      {n.sender?.name}
+                    </strong>{" "}
+                    followed you{" "}
+                    {n.isNew && (
+                      <span
+                        style={{
+                          background: "yellow",
+                          color: "black",
+                          fontSize: "11px",
+                          padding: "2px 5px",
+                          borderRadius: "5px",
+                          marginLeft: "6px",
+                        }}
+                      >
+                        NEW
+                      </span>
+                    )}
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#888" }}>
+                    {new Date(n.createdAt).toLocaleTimeString()}
+                  </span>
+                </div>
+              ))
           )}
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 20,
+            right: 20,
+            backgroundColor: "#2563eb",
+            color: "#fff",
+            padding: "15px 20px",
+            borderRadius: "12px",
+            boxShadow: "0px 4px 12px rgba(0,0,0,0.2)",
+            zIndex: 9999,
+            animation: "fadeInOut 4s forwards",
+          }}
+        >
+          <strong>{toast.sender?.name}</strong> followed you
         </div>
       )}
     </div>

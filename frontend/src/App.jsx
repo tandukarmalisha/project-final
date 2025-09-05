@@ -21,6 +21,7 @@ import NotificationDropDown from "./components/NotificationDropdown";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import NotificationsPage from "./pages/NotificationPage";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="/recommend" element={<RecommendPage />} />
           <Route path="/recommend/:title" element={<RecommendationResult />} />
           <Route path="/notifications" element={<NotificationDropDown/>} />
+          <Route path="/notification-page" element={<NotificationsPage/>}/>
           
         </Route>
 

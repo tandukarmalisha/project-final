@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const router = require("./router.config");
-
+const http = require("http");
+const {Server}= require("socket.io")
 const app = express();
 
 //Global Middleware***********
@@ -34,7 +35,26 @@ app.use((err, req, res, next) => {
   });
 });
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: { origin: "http://localhost:5173", credentials: true }, // allow frontend
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("joinRoom", (userId) => {
+    socket.join(userId); // each user joins their own room
+    console.log(`User ${socket.id} joined room ${userId}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+// ✅ Export both app and io if needed
+module.exports = { app, io, server };
 
 
-module.exports = app;
 

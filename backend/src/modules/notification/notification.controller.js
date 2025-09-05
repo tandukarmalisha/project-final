@@ -1,6 +1,20 @@
+const { io } = require("../../config/express.config");
+
 const Notification = require("./notification.model");
 
-exports.getNotifications = async (req, res) => {
+exports.sendFollowNotification = async (senderId, receiverId) => {
+  const notification = await Notification.create({
+    sender: senderId,
+    receiver: receiverId,
+    type: "follow",
+    message: "followed you",
+  });
+
+  // Emit to the receiver in real-time
+  io.to(receiverId.toString()).emit("newNotification", notification);
+};
+
+ exports.getNotifications = async (req, res) => {
   const userId = req.params.userId;
 
   try {

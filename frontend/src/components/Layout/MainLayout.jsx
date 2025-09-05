@@ -150,7 +150,7 @@ const MainLayout = () => {
                 {!isCollapsed && <span>Search Blog</span>}
               </Link>
 
-              <Link className="sidebar-link" to="/notifications">
+              <Link className="sidebar-link" to="/notification-page">
                 <FontAwesomeIcon icon={faBell} style={{ color: "#6366f1", transition: "color 0.3s" }} />
                 {!isCollapsed && <span>Notifications</span>}
               </Link>
