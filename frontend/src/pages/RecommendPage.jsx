@@ -1,11 +1,7 @@
-// src/pages/RecommendPage.jsx
-
 import React, { useState } from "react";
 import axios from "axios";
-import BlogCard from "../components/BlogCard"; // adjust the path as needed
+import BlogCard from "../components/BlogCard";
 import { toast } from "react-toastify";
-import "./RecommendPage.css";  // import your css
-
 
 const RecommendPage = () => {
   const [inputTitle, setInputTitle] = useState("");
@@ -14,11 +10,11 @@ const RecommendPage = () => {
 
   const currentUserId = JSON.parse(localStorage.getItem("user"))?._id;
 
-  const handleRecommend = async () => {
-    if (!inputTitle.trim()) return;
+  const fetchRecommendations = async (title) => {
+    if (!title.trim()) return;
     try {
       setLoading(true);
-      const encodedTitle = encodeURIComponent(inputTitle.trim());
+      const encodedTitle = encodeURIComponent(title.trim());
       const res = await axios.get(
         `http://localhost:8000/api/blog/recommend-content/${encodedTitle}`
       );
@@ -31,41 +27,91 @@ const RecommendPage = () => {
     }
   };
 
-  
-return (
-    <div style={{ padding: "1.5rem", maxWidth: "80rem", margin: "0 auto" }}>
-      <h2 style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "1.5rem", color: "#D97706" /* yellow-500 */ }}>
-        Blog Recommendations
-      </h2>
-      <h2>Search here</h2>
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      fetchRecommendations(inputTitle);
+    }
+  };
 
-      {/* Input group styles inline or you can move to CSS */}
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1.5rem" }}>
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        padding: "2rem",
+        maxWidth: "90rem",
+        margin: "0 auto",
+        fontFamily: "'Inter', sans-serif",
+        background: "linear-gradient(135deg, #f0f4f8, #ffffff)",
+      }}
+    >
+      <h1
+        style={{
+          fontSize: "2.8rem",
+          fontWeight: "bold",
+          marginBottom: "2rem",
+          color: "#D97706", // yellow-500
+          textAlign: "center",
+        }}
+      >
+        Blog Recommendations
+      </h1>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "1rem",
+          marginBottom: "2rem",
+          justifyContent: "center",
+          flexWrap: "wrap",
+        }}
+      >
         <input
           type="text"
           placeholder="Enter blog title or keyword"
           value={inputTitle}
           onChange={(e) => setInputTitle(e.target.value)}
+          onKeyDown={handleKeyDown}
           style={{
             flexGrow: 1,
-            padding: "0.5rem 1rem",
-            border: "1px solid #ccc",
-            borderRadius: "0.375rem",
-            fontSize: "1rem"
+            minWidth: "250px",
+            maxWidth: "600px",
+            padding: "0.6rem 1rem",
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            fontSize: "1rem",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+            transition: "all 0.2s ease",
           }}
+          onFocus={(e) =>
+            (e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.2)")
+          }
+          onBlur={(e) => (e.target.style.boxShadow = "0 2px 6px rgba(0,0,0,0.08)")}
         />
         <button
-          onClick={handleRecommend}
+          onClick={() => fetchRecommendations(inputTitle)}
           disabled={loading}
           style={{
-            backgroundColor: "#2563EB", // blue-600
-            color: "white",
-            padding: "0.5rem 1.5rem",
-            borderRadius: "0.375rem",
+            backgroundColor: "#2563EB",
+            color: "#fff",
+            padding: "0.6rem 1.5rem",
+            borderRadius: "12px",
             border: "none",
             cursor: loading ? "not-allowed" : "pointer",
-            fontWeight: "bold",
-            width:"200px"
+            fontWeight: "600",
+            fontSize: "1rem",
+            minWidth: "160px",
+            boxShadow: "0 4px 12px rgba(37,99,235,0.3)",
+            transition: "all 0.3s ease",
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = "#1e40af";
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 6px 16px rgba(37,99,235,0.4)";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = "#2563EB";
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(37,99,235,0.3)";
           }}
         >
           {loading ? "Searching..." : "Recommend"}
@@ -74,16 +120,33 @@ return (
 
       {/* Recommendation grid */}
       {recommendations.length > 0 ? (
-        <div className="recommend-grid">
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: "1.5rem",
+            transition: "all 0.3s ease",
+          }}
+        >
           {recommendations.map((blog) => (
-            <div key={blog._id}>
-              <BlogCard blog={blog} currentUserId={currentUserId} compact={true} />
-            </div>
+            <BlogCard
+              key={blog._id}
+              blog={blog}
+              currentUserId={currentUserId}
+              compact={true}
+            />
           ))}
         </div>
       ) : (
         !loading && (
-          <p style={{ color: "#6B7280", textAlign: "center", marginTop: "2.5rem" }}>
+          <p
+            style={{
+              color: "#6B7280",
+              textAlign: "center",
+              marginTop: "3rem",
+              fontSize: "1.1rem",
+            }}
+          >
             No recommendations found. Try searching again.
           </p>
         )
