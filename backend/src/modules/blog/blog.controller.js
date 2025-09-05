@@ -465,6 +465,33 @@ exports.recommendByCategoryPublic = async (req, res) => {
 };
 
 
+exports.getFollowingFirstPosts = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Load User model dynamically to avoid circular dependency
+    const User = require("../user/user.model");
+    const user = await User.findById(userId);
+    const followingIds = user?.following || [];
+
+    // 1️⃣ Posts from following
+    const followingPosts = await Blog.find({ author: { $in: followingIds } })
+      .populate("author", "name")
+      .sort({ createdAt: -1 });
+
+    // 2️⃣ Other posts
+    const otherPosts = await Blog.find({ author: { $nin: followingIds } })
+      .populate("author", "name")
+      .sort({ createdAt: -1 });
+
+    const allPosts = [...followingPosts, ...otherPosts];
+    res.json(allPosts);
+  } catch (error) {
+    console.error("Following-first posts error:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 
 
 

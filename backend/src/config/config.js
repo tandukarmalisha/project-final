@@ -7,4 +7,4 @@ const MongoDbConfig = {
 
 module.exports = {
     MongoDbConfig,
-};
+};  

@@ -82,9 +82,18 @@ const Navbar = () => {
 
   return (
     <nav style={navStyle}>
+      <div style={{ display: 'flex' }}>
+    <Link to="/" style={{ textDecoration: 'none' }}>
+      <img 
+        src="/favicon.ico" 
+        alt="IdeaFlux Logo" 
+        style={{ width: '60px', height: '60px', marginRight: '10px' }} 
+      />
+    </Link>
       <Link to="/" style={brandStyle}>
         IdeaFlux
       </Link>
+      </div>
       
       
 
