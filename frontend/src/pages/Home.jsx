@@ -37,15 +37,29 @@ const Home = () => {
         const fIds = followingRes.user.following.map((f) => f._id);
         setFollowingIds(fIds);
 
+        // sortedBlogs = latestData.slice().sort((a, b) => {
+        //   const aFollowed = !!(a.author && fIds.includes(a.author._id));
+        //   const bFollowed = !!(b.author && fIds.includes(b.author._id));
+
+        //   if (aFollowed && !bFollowed) return -1;
+        //   if (!aFollowed && bFollowed) return 1;
+
+        //   return new Date(b.createdAt) - new Date(a.createdAt);
+        // });
+
         sortedBlogs = latestData.slice().sort((a, b) => {
-          const aFollowed = !!(a.author && fIds.includes(a.author._id));
-          const bFollowed = !!(b.author && fIds.includes(b.author._id));
+  // Treat followed authors OR current user as "priority"
+  const aFollowedOrSelf =
+    !!(a.author && (fIds.includes(a.author._id) || a.author._id === user.id));
+  const bFollowedOrSelf =
+    !!(b.author && (fIds.includes(b.author._id) || b.author._id === user.id));
 
-          if (aFollowed && !bFollowed) return -1;
-          if (!aFollowed && bFollowed) return 1;
+  if (aFollowedOrSelf && !bFollowedOrSelf) return -1;
+  if (!aFollowedOrSelf && bFollowedOrSelf) return 1;
 
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
+  // If both are same priority, sort by newest first
+  return new Date(b.createdAt) - new Date(a.createdAt);
+});
 
         setCurrentUserId(user.id);
 
@@ -109,9 +123,17 @@ const Home = () => {
   };
 
   // Determine index where first "others" blog starts
-  const firstOtherIndex = initialBlogs.findIndex(
-    (b) => !b.author || (user && !followingIds.includes(b.author._id))
-  );
+  // const firstOtherIndex = initialBlogs.findIndex(
+  //   (b) => !b.author || (user && !followingIds.includes(b.author._id))
+  // );
+  // Determine index where first "others" blog starts
+// Exclude blogs by the current user from "others"
+const firstOtherIndex = initialBlogs.findIndex(
+  (b) =>
+    !b.author || 
+    (user && !followingIds.includes(b.author._id) && b.author._id !== user.id)
+);
+
 
   return (
     <div
