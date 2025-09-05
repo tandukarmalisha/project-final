@@ -1,0 +1,136 @@
+/* Global styles for the form container */
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #c3cfe2, #f5f7fa);
+  font-family: 'Poppins', sans-serif;
+}
+
+.login-title {
+  text-align: center;
+  color: #4f46e5;
+  font-size: 2rem;
+  margin-bottom: 25px;
+  font-weight: 600;
+}
+
+.form-container {
+    height: 95vh;
+  max-width: 450px;
+  margin: 50px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  font-family: 'Poppins', sans-serif;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-container:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+/* Form header */
+.form-container h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 2rem;
+  color: #4f46e5;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+/* Input fields */
+.form-container input,
+.form-container select {
+  width: 100%;
+  padding: 14px 18px;
+  margin: 8px 0 1px 0;
+  border: none;
+  border-radius: 12px;
+  background: #f0f4ff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-container input:focus,
+.form-container select:focus {
+  outline: none;
+  background: #e0e7ff;
+  box-shadow: 0 0 8px rgba(79, 70, 229, 0.5);
+}
+
+/* Button styling */
+.form-container button[type="submit"] {
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.form-container button[type="submit"]:hover {
+  background: #6366f1;
+  transform: scale(1.03);
+}
+
+/* Error messages */
+.error-text {
+  color: #f87171;
+  font-size: 0.85rem;
+  height: 18px;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.error-text.show {
+  opacity: 1;
+}
+
+/* Popup error */
+.popup-error {
+  background: #f87171;
+  color: #fff;
+  padding: 12px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 500;
+  animation: fadeInOut 7s ease forwards;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Server message */
+.form-container p {
+  text-align: center;
+  color: #2563eb;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+/* Login link styling */
+.form-container p button {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.form-container p button:hover {
+  color: #3730a3;
+  transform: scale(1.05);
+}
