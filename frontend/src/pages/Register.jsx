@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import "./Register.css"; // same structure as Login.css
 
 const Register = () => {
   const [form, setForm] = useState({
@@ -41,8 +42,7 @@ const Register = () => {
         gender: "female",
       });
 
-      navigate("/login"); // ✅ Redirect to login
-
+      navigate("/login");
     } catch (err) {
       if (err.response?.data?.errors) {
         const fieldErrors = {};
@@ -64,89 +64,91 @@ const Register = () => {
 
   return (
     <div className="login-wrapper">
-        <div className="form-container">
-          <h2 className="login-title" >Register</h2>
-          {serverMsg && <p>{serverMsg}</p>}
+      <div className="login-card">
+        <h2 className="login-title">Create Account</h2>
 
-          {popupError && (
-            <div className="popup-error">
-              {popupError}
-            </div>
-          )}
+        {serverMsg && <p className="server-msg">{serverMsg}</p>}
+        {popupError && <div className="popup-error">{popupError}</div>}
 
-          <form onSubmit={handleSubmit}>
-            <input
-              name="name"
-              placeholder="Name"
-              value={form.name}
-              onChange={handleChange}
-              required
-            />
-            <p className={`error-text ${errors.name ? "show" : ""}`}>
-              {errors.name || " "}
-            </p>
+        <form onSubmit={handleSubmit} className="login-form">
+          <input
+            name="name"
+            placeholder="Name"
+            value={form.name}
+            onChange={handleChange}
+            required
+            className="login-input"
+          />
+          <p className={`error-text ${errors.name ? "show" : ""}`}>
+            {errors.name || " "}
+          </p>
 
-            <input
-              name="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={handleChange}
-              required
-            />
-            <p className={`error-text ${errors.email ? "show" : ""}`}>
-              {errors.email || " "}
-            </p>
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            className="login-input"
+          />
+          <p className={`error-text ${errors.email ? "show" : ""}`}>
+            {errors.email || " "}
+          </p>
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-            <p className={`error-text ${errors.password ? "show" : ""}`}>
-              {errors.password || " "}
-            </p>
+          <input
+            type="password"
+            name="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={handleChange}
+            required
+            className="login-input"
+          />
+          <p className={`error-text ${errors.password ? "show" : ""}`}>
+            {errors.password || " "}
+          </p>
 
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-            <p className={`error-text ${errors.confirmPassword ? "show" : ""}`}>
-              {errors.confirmPassword || " "}
-            </p>
+          <input
+            type="password"
+            name="confirmPassword"
+            placeholder="Confirm Password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+            required
+            className="login-input"
+          />
+          <p className={`error-text ${errors.confirmPassword ? "show" : ""}`}>
+            {errors.confirmPassword || " "}
+          </p>
 
-            <select name="gender" value={form.gender} onChange={handleChange}>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
+          <select
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+            className="login-input"
+          >
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
 
-            <button type="submit">Register</button>
+          <button type="submit" className="login-btn">
+            Register
+          </button>
+        </form>
 
-            <p style={{ textAlign: "center" }}>
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => navigate("/login")}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#4f46e5",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                }}
-              >
-                Login here
-              </button>
-            </p>
-          </form>
-        </div>
+        <p className="register-text">
+          Already have an account?{" "}
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="register-btn"
+          >
+            Login here
+          </button>
+        </p>
+      </div>
     </div>
   );
 };

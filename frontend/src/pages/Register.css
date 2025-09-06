@@ -1,4 +1,4 @@
-/* Global styles for the form container */
+/* Same wrapper as login */
 .login-wrapper {
   display: flex;
   justify-content: center;
@@ -8,47 +8,67 @@
   font-family: 'Poppins', sans-serif;
 }
 
-.login-title {
-  text-align: center;
-  color: #4f46e5;
-  font-size: 2rem;
-  margin-bottom: 25px;
-  font-weight: 600;
-}
-
-.form-container {
-    height: 95vh;
-  max-width: 450px;
-  margin: 50px auto;
-  padding: 40px;
-  background: white;
+/* Card styling (same as login-card) */
+.login-card {
+  width: 400px;
+  padding: 40px 30px;
+  background: #fff;
   border-radius: 20px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  font-family: 'Poppins', sans-serif;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.form-container:hover {
+.login-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
 }
 
-/* Form header */
-.form-container h2 {
+/* Title */
+.login-title {
   text-align: center;
-  margin-bottom: 25px;
-  font-size: 2rem;
   color: #4f46e5;
-  letter-spacing: 1px;
+  font-size: 2rem;
+  margin-bottom: 20px;
   font-weight: 600;
 }
 
-/* Input fields */
-.form-container input,
-.form-container select {
-  width: 100%;
+/* Server and popup messages */
+.server-msg {
+  text-align: center;
+  color: #2563eb;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.popup-error {
+  background: #f87171;
+  color: #fff;
+  padding: 10px;
+  border-radius: 12px;
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: 500;
+  animation: fadeInOut 7s ease forwards;
+}
+
+/* Fade animation */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* Form styling */
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Inputs & Select */
+.login-input {
   padding: 14px 18px;
-  margin: 8px 0 1px 0;
+  margin-bottom: 10px;
   border: none;
   border-radius: 12px;
   background: #f0f4ff;
@@ -56,16 +76,28 @@
   transition: all 0.3s ease;
 }
 
-.form-container input:focus,
-.form-container select:focus {
+.login-input:focus {
   outline: none;
   background: #e0e7ff;
   box-shadow: 0 0 8px rgba(79, 70, 229, 0.5);
 }
 
-/* Button styling */
-.form-container button[type="submit"] {
-  width: 100%;
+/* Error text under input */
+.error-text {
+  color: #f87171;
+  font-size: 0.85rem;
+  margin: -5px 0 8px;
+  height: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.error-text.show {
+  opacity: 1;
+}
+
+/* Submit button */
+.login-btn {
   padding: 14px 18px;
   border: none;
   border-radius: 12px;
@@ -77,60 +109,31 @@
   margin-top: 10px;
 }
 
-.form-container button[type="submit"]:hover {
+.login-btn:hover {
   background: #6366f1;
   transform: scale(1.03);
 }
 
-/* Error messages */
-.error-text {
-  color: #f87171;
-  font-size: 0.85rem;
-  height: 18px;
-  margin-top: -10px;
-  margin-bottom: 10px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.error-text.show {
-  opacity: 1;
-}
-
-/* Popup error */
-.popup-error {
-  background: #f87171;
-  color: #fff;
-  padding: 12px;
-  border-radius: 12px;
+/* Bottom text */
+.register-text {
   text-align: center;
-  margin-bottom: 20px;
-  font-weight: 500;
-  animation: fadeInOut 7s ease forwards;
+  margin-top: 20px;
+  font-size: 0.95rem;
+  color: #374151;
 }
 
-@keyframes fadeInOut {
-  0% { opacity: 0; transform: translateY(-10px); }
-  10% { opacity: 1; transform: translateY(0); }
-  90% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-10px); }
-}
-
-/* Server message */
-.form-container p {
-  text-align: center;
-  color: #2563eb;
-  font-weight: 500;
-  margin-bottom: 15px;
-}
-
-/* Login link styling */
-.form-container p button {
+.register-btn {
+  background: none;
+  border: none;
+  color: #4f46e5;
+  cursor: pointer;
+  text-decoration: underline;
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
-.form-container p button:hover {
+.register-btn:hover {
   color: #3730a3;
+  background-color: white;
   transform: scale(1.05);
 }
