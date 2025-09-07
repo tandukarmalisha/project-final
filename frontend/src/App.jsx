@@ -22,6 +22,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import NotificationsPage from "./pages/NotificationPage";
+import AdminPage from "./pages/AdminPage";
+import AdminUpdate from "./pages/AdminUpdate";
 
 function App() {
   return (
@@ -44,7 +46,10 @@ function App() {
           <Route path="/notification-page" element={<NotificationsPage/>}/>
           
         </Route>
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin-update-blog/:id" element={<AdminUpdate />} />
 
+        {/* adminPage */}
         {/* Public/auth routes outside layout */}
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
